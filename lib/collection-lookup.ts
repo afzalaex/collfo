@@ -1,0 +1,90 @@
+import type { CollectionSummary } from "./types";
+import {
+  getCollectionStats,
+  getOpenSeaCollection,
+  openSeaChainToSupported,
+} from "./providers/opensea";
+import { getAddress, isAddress } from "viem";
+
+export type LookupResult = {
+  collection: CollectionSummary | null;
+  slug: string;
+  error?: string;
+};
+
+/**
+ * Resolve one OpenSea collection slug → CollectionSummary (+ stats owners).
+ */
+export async function lookupOpenSeaCollection(
+  slugRaw: string
+): Promise<LookupResult> {
+  const slug = slugRaw.trim().toLowerCase();
+  if (!slug || !/^[a-z0-9_-]+$/.test(slug)) {
+    return { collection: null, slug, error: "Invalid slug" };
+  }
+
+  const detail = await getOpenSeaCollection(slug);
+  if (!detail || detail.is_disabled) {
+    return {
+      collection: null,
+      slug,
+      error: detail?.is_disabled
+        ? "Collection is disabled on OpenSea"
+        : "Collection not found on OpenSea",
+    };
+  }
+
+  const contracts = (detail.contracts ?? [])
+    .map((c) => {
+      const chain = openSeaChainToSupported(c.chain);
+      if (!chain || !isAddress(c.address)) return null;
+      return {
+        chainKey: chain.key,
+        chainId: chain.id,
+        address: getAddress(c.address),
+      };
+    })
+    .filter(Boolean) as Array<{
+    chainKey: string;
+    chainId: number;
+    address: string;
+  }>;
+
+  const primary = contracts[0];
+  let numOwners: number | null = null;
+  try {
+    const stats = await getCollectionStats(slug);
+    numOwners = stats.numOwners;
+  } catch {
+    /* leave null */
+  }
+
+  return {
+    slug,
+    collection: {
+      chainId: primary?.chainId ?? 0,
+      chainKey: primary?.chainKey ?? "unknown",
+      contractAddress: primary?.address ?? `opensea:${slug}`,
+      name: detail.name ?? slug,
+      symbol: null,
+      tokenType: "UNKNOWN",
+      discovery: "user_added",
+      openseaSlug: detail.collection || slug,
+      totalSupply:
+        typeof detail.total_supply === "number" ? detail.total_supply : null,
+      uniqueOwners: numOwners,
+      imageUrl: detail.image_url ?? null,
+    },
+  };
+}
+
+export async function lookupOpenSeaCollections(
+  slugs: string[]
+): Promise<LookupResult[]> {
+  const out: LookupResult[] = [];
+  // Sequential to be gentle on OpenSea rate limits
+  for (const slug of slugs) {
+    out.push(await lookupOpenSeaCollection(slug));
+  }
+  return out;
+}

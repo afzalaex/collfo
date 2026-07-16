@@ -1,0 +1,29 @@
+{
+  "name": "collectorfo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Every collector of an artist — across Ethereum and L2s",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "html-to-image": "^1.11.13",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "viem": "^2.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.0"
+  }
+}

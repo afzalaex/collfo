@@ -1,0 +1,65 @@
+import type { Metadata } from "next";
+import { Space_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SiteFooter } from "@/components/SiteFooter";
+import { SiteNav } from "@/components/SiteNav";
+import "./globals.css";
+
+const siteUrl = (process.env.SITE_URL?.trim() || "https://collectorfo.aex.design").replace(
+  /\/+$/,
+  ""
+);
+
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-space-mono",
+});
+
+const title = "Collectorfo";
+const description =
+  "For artists minting on Ethereum and its L2s. See who holds your work across every collection you've created.";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  applicationName: title,
+  title: {
+    default: title,
+    template: `%s · Collectorfo`,
+  },
+  description,
+  icons: {
+    icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title,
+    description,
+    url: siteUrl,
+    siteName: title,
+    type: "website",
+    images: [{ url: "/icon-512.png", width: 512, height: 512, alt: title }],
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+    images: ["/icon-512.png"],
+  },
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={`theme-dark ${spaceMono.variable}`}>
+      <body>
+        <div className="site-root">
+          <SiteNav />
+          <main className="site-content">{children}</main>
+          <SiteFooter />
+        </div>
+        <Analytics />
+      </body>
+    </html>
+  );
+}
