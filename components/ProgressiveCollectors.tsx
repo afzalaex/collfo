@@ -30,14 +30,7 @@ type Props = {
   totalOwnersSum: number;
 };
 
-type Phase =
-  | "idle"
-  | "counting"
-  | "counted"
-  | "detailing"
-  | "detailed"
-  | "paused_count"
-  | "paused_detail";
+type Phase = "idle" | "running" | "paused" | "done";
 
 type DetailRow = {
   collectionCount: number;
@@ -53,9 +46,7 @@ function sleep(ms: number) {
 
 /**
  * Initial: collections + stats owner counts (fast).
- * Then two separate jobs:
- *  A) Unique collectors — Set of wallets only (number)
- *  B) Collector details — full rows + ENS + paginated table
+ * One job walks holders once → unique count + full collector details / CSV.
  */
 export function ProgressiveCollectors({
   artist,
@@ -171,7 +162,7 @@ export function ProgressiveCollectors({
     async (inputRaw: string): Promise<string | null> => {
       const input = inputRaw.trim();
       if (!input || addingMissed) return null;
-      if (phase === "counting" || phase === "detailing") {
+      if (phase === "running") {
         return "Pause the current job before adding collections";
       }
 
@@ -295,22 +286,10 @@ export function ProgressiveCollectors({
       });
   }, [version]);
 
-  const countProgress = useMemo(() => {
-    void version;
-    return countDoneRef.current.size;
-  }, [version]);
-
-  const detailProgress = useMemo(() => {
+  const jobProgress = useMemo(() => {
     void version;
     return detailDoneRef.current.size;
   }, [version]);
-
-  const mergeUnique = useCallback((holders: Array<{ address: string }>) => {
-    for (const h of holders) {
-      uniqueSetRef.current.add(h.address);
-    }
-    setVersion((v) => v + 1);
-  }, []);
 
   const mergeDetail = useCallback(
     (
@@ -378,155 +357,189 @@ export function ProgressiveCollectors({
     }
   }, []);
 
+  /**
+   * Load every holder for a slug by requesting server chunks until OpenSea is done.
+   * Avoids the old hard page-cap under-count on huge collections (SuperRare, big OEs).
+   */
   const fetchHolders = useCallback(
     async (
-      slug: string
+      slug: string,
+      onProgress?: (loaded: number, chunk: number) => void
     ): Promise<{
       holders: Array<{ address: string; quantity: number }>;
       uniqueOwners: number;
-      truncated?: boolean;
+      complete: boolean;
     } | null> => {
-      let lastError = "network error";
-      for (let attempt = 1; attempt <= 8 && !abortRef.current; attempt++) {
-        try {
-          const response = await fetch(
-            `/api/artist/${encodeURIComponent(artist)}/holders?slug=${encodeURIComponent(slug)}`
-          );
+      const all: Array<{ address: string; quantity: number }> = [];
+      const seen = new Set<string>();
+      let cursor: string | null = null;
+      let chunk = 0;
+      // ~5000 pages * 100 = 500k wallets safety (LIMITS.maxHolderPagesTotal)
+      const maxChunks = 200;
 
-          if (response.ok) {
-            return (await response.json()) as {
+      while (chunk < maxChunks && !abortRef.current) {
+        chunk += 1;
+        let lastError = "network error";
+        let chunkOk:
+          | {
               holders: Array<{ address: string; quantity: number }>;
-              uniqueOwners: number;
+              hasMore?: boolean;
+              nextCursor?: string | null;
               truncated?: boolean;
-            };
+            }
+          | null = null;
+
+        for (let attempt = 1; attempt <= 8 && !abortRef.current; attempt++) {
+          try {
+            const params = new URLSearchParams({ slug });
+            if (cursor) params.set("cursor", cursor);
+            const response = await fetch(
+              `/api/artist/${encodeURIComponent(artist)}/holders?${params}`
+            );
+
+            if (response.ok) {
+              chunkOk = (await response.json()) as {
+                holders: Array<{ address: string; quantity: number }>;
+                hasMore?: boolean;
+                nextCursor?: string | null;
+                truncated?: boolean;
+              };
+              break;
+            }
+
+            const body = await response.json().catch(() => ({}));
+            lastError =
+              (body as { error?: string }).error || `HTTP ${response.status}`;
+            const retryable =
+              response.status === 429 || response.status >= 500;
+            if (!retryable || attempt === 8) break;
+
+            const wait = Math.min(60_000, 1_500 * 2 ** (attempt - 1));
+            setStatusLine(
+              `${response.status === 429 ? "Rate limited" : "OpenSea error"}. Waiting ${Math.round(wait / 1000)}s… (${attempt}/8) · ${slug}`
+            );
+            await sleep(wait);
+          } catch (e) {
+            lastError = e instanceof Error ? e.message : "network error";
+            if (attempt === 8) break;
+            await sleep(Math.min(60_000, 1_500 * 2 ** (attempt - 1)));
           }
-
-          const body = await response.json().catch(() => ({}));
-          lastError =
-            (body as { error?: string }).error || `HTTP ${response.status}`;
-          const retryable =
-            response.status === 429 || response.status >= 500;
-          if (!retryable || attempt === 8) break;
-
-          const wait = Math.min(60_000, 1_500 * 2 ** (attempt - 1));
-          setStatusLine(
-            `${response.status === 429 ? "Rate limited" : "OpenSea error"}. Waiting ${Math.round(wait / 1000)}s… (${attempt}/8)`
-          );
-          await sleep(wait);
-        } catch (e) {
-          lastError = e instanceof Error ? e.message : "network error";
-          if (attempt === 8) break;
-          await sleep(Math.min(60_000, 1_500 * 2 ** (attempt - 1)));
         }
+
+        if (!chunkOk) {
+          setErrors((prev) => [...prev.slice(-7), `${slug}: ${lastError}`]);
+          // Return what we have so far only if something loaded — else null
+          if (!all.length) return null;
+          return {
+            holders: all,
+            uniqueOwners: all.length,
+            complete: false,
+          };
+        }
+
+        for (const h of chunkOk.holders ?? []) {
+          if (seen.has(h.address)) continue;
+          seen.add(h.address);
+          all.push(h);
+        }
+
+        onProgress?.(all.length, chunk);
+
+        const hasMore =
+          chunkOk.hasMore === true ||
+          (chunkOk.truncated === true && Boolean(chunkOk.nextCursor));
+        const next = chunkOk.nextCursor ?? null;
+
+        if (!hasMore || !next) {
+          return {
+            holders: all,
+            uniqueOwners: all.length,
+            complete: true,
+          };
+        }
+
+        cursor = next;
+        // Brief gap between chunks (server already paced pages inside the chunk)
+        await sleep(200);
       }
-      setErrors((prev) => [...prev.slice(-7), `${slug}: ${lastError}`]);
-      return null;
+
+      if (chunk >= maxChunks) {
+        setErrors((prev) => [
+          ...prev.slice(-7),
+          `${slug}: hit absolute safety cap — contact if this collection is larger`,
+        ]);
+        return {
+          holders: all,
+          uniqueOwners: all.length,
+          complete: false,
+        };
+      }
+
+      return {
+        holders: all,
+        uniqueOwners: all.length,
+        complete: !abortRef.current,
+      };
     },
     [artist]
   );
 
-  /** Job A: unique count only */
-  const runUniqueCount = useCallback(async () => {
+  /**
+   * One walk: unique collectors + full details (table / CSV) together.
+   */
+  const runCollectors = useCallback(async () => {
     if (runningRef.current) return;
-    runningRef.current = true;
-    abortRef.current = false;
-    setPhase("counting");
-    setErrors([]);
 
-    try {
-      for (let i = 0; i < collections.length; i++) {
-        if (abortRef.current) {
-          setPhase("paused_count");
-          setCurrentName(null);
-          setStatusLine(
-            `Paused unique count · ${uniqueSetRef.current.size.toLocaleString()} so far · ${countDoneRef.current.size}/${collections.length} collections`
-          );
-          return;
-        }
+    const slugged = collections.filter((c) => c.openseaSlug);
+    const remaining = slugged.filter(
+      (c) => !detailDoneRef.current.has(c.openseaSlug!)
+    );
+    const isResume =
+      phase === "paused" ||
+      (detailDoneRef.current.size > 0 && remaining.length > 0);
 
-        const col = collections[i]!;
-        const slug = col.openseaSlug;
-        if (!slug || countDoneRef.current.has(slug)) continue;
-
-        setCurrentName(col.name ?? slug);
-        setStatusLine(
-          `Unique count · ${i + 1}/${collections.length}: ${col.name ?? slug} · ${uniqueSetRef.current.size.toLocaleString()} wallets so far`
-        );
-
-        const data = await fetchHolders(slug);
-        if (data) {
-          mergeUnique(data.holders ?? []);
-          countDoneRef.current.add(slug);
-          if (data.truncated) {
-            setErrors((e) => [
-              ...e.slice(-7),
-              `${slug}: partial holders (page cap) — count may be low`,
-            ]);
-          }
-        }
-
-        if (i < collections.length - 1 && !abortRef.current) {
-          await sleep(900);
-        }
-      }
-
-      if (abortRef.current) return;
-
-      setPhase("counted");
-      setCurrentName(null);
-      setStatusLine(
-        `Unique collectors: ${uniqueSetRef.current.size.toLocaleString()} (de-duplicated across ${countDoneRef.current.size} collections).`
-      );
+    // Full re-run: wipe previous walk
+    if (!isResume && (detailDoneRef.current.size > 0 || uniqueSetRef.current.size > 0)) {
+      uniqueSetRef.current.clear();
+      detailMapRef.current.clear();
+      countDoneRef.current.clear();
+      detailDoneRef.current.clear();
+      ensDoneRef.current.clear();
       setVersion((v) => v + 1);
-    } finally {
-      runningRef.current = false;
     }
-  }, [collections, fetchHolders, mergeUnique]);
 
-  /** Job B: full collector details */
-  const runDetails = useCallback(async () => {
-    if (runningRef.current) return;
-
-    const remaining = collections.filter(
-      (c) => c.openseaSlug && !detailDoneRef.current.has(c.openseaSlug)
-    );
-    if (!remaining.length && detailMapRef.current.size > 0) {
-      setPhase("detailed");
-      setStatusLine(
-        `Collector details ready · ${detailMapRef.current.size.toLocaleString()} wallets.`
+    if (!isResume) {
+      const estimated =
+        totalOwnersSum > 0
+          ? `Σ owners ≈ ${totalOwnersSum.toLocaleString("en-US")} (not unique). `
+          : "";
+      const ok = window.confirm(
+        [
+          "Load unique collectors + full details?",
+          "",
+          `Collections: ${collections.length}`,
+          estimated +
+            "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
+          "Can take many minutes for large artists. OpenSea rate limits apply.",
+          "",
+          "Continue?",
+        ].join("\n")
       );
-      return;
+      if (!ok) return;
     }
-
-    const estimated =
-      totalOwnersSum > 0
-        ? `Σ owners ≈ ${totalOwnersSum.toLocaleString()} (upper bound). `
-        : "";
-    const ok = window.confirm(
-      [
-        "Load full collector details?",
-        "",
-        `Collections: ${collections.length}`,
-        estimated + "This walks every holder and builds the full wallet list (addresses, ENS, ranking).",
-        "Can take many minutes for large artists. OpenSea rate limits apply.",
-        "",
-        "Continue?",
-      ].join("\n")
-    );
-    if (!ok) return;
 
     runningRef.current = true;
     abortRef.current = false;
-    setPhase("detailing");
+    setPhase("running");
     setErrors([]);
 
     try {
       for (let i = 0; i < collections.length; i++) {
         if (abortRef.current) {
-          setPhase("paused_detail");
+          setPhase("paused");
           setCurrentName(null);
           setStatusLine(
-            `Paused details · ${detailMapRef.current.size.toLocaleString()} wallets · ${detailDoneRef.current.size}/${collections.length} collections`
+            `Paused · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique · ${detailMapRef.current.size.toLocaleString("en-US")} rows · ${detailDoneRef.current.size}/${collections.length} collections`
           );
           return;
         }
@@ -537,31 +550,30 @@ export function ProgressiveCollectors({
 
         setCurrentName(col.name ?? slug);
         setStatusLine(
-          `Details · ${i + 1}/${collections.length}: ${col.name ?? slug} · ${detailMapRef.current.size.toLocaleString()} wallets`
+          `${i + 1}/${collections.length}: ${col.name ?? slug} · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique · ${detailMapRef.current.size.toLocaleString("en-US")} rows`
         );
 
-        const data = await fetchHolders(slug);
+        const data = await fetchHolders(slug, (loaded) => {
+          setStatusLine(
+            `${i + 1}/${collections.length}: ${col.name ?? slug} · walking ${loaded.toLocaleString("en-US")} · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique`
+          );
+        });
         if (data) {
           mergeDetail(slug, col.chainKey, data.holders ?? []);
-          // Keep unique count in sync if they skipped job A
-          countDoneRef.current.add(slug);
-          detailDoneRef.current.add(slug);
-          setCollections((prev) =>
-            prev.map((item) =>
-              item.openseaSlug === slug
-                ? {
-                    ...item,
-                    uniqueOwners: data.truncated
-                      ? item.uniqueOwners
-                      : data.uniqueOwners,
-                  }
-                : item
-            )
-          );
-          if (data.truncated) {
+          if (data.complete) {
+            countDoneRef.current.add(slug);
+            detailDoneRef.current.add(slug);
+            setCollections((prev) =>
+              prev.map((item) =>
+                item.openseaSlug === slug
+                  ? { ...item, uniqueOwners: data.uniqueOwners }
+                  : item
+              )
+            );
+          } else if (!abortRef.current) {
             setErrors((e) => [
               ...e.slice(-7),
-              `${slug}: partial holders (page cap)`,
+              `${slug}: incomplete holder walk — counts may be low`,
             ]);
           }
         }
@@ -574,10 +586,10 @@ export function ProgressiveCollectors({
 
       if (abortRef.current) return;
 
-      setPhase("detailed");
+      setPhase("done");
       setCurrentName(null);
       setStatusLine(
-        `Collector details ready · ${detailMapRef.current.size.toLocaleString()} unique wallets.`
+        `Ready · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique collectors · full list available.`
       );
       await resolveEnsBatch();
       setVersion((v) => v + 1);
@@ -588,6 +600,7 @@ export function ProgressiveCollectors({
     collections,
     fetchHolders,
     mergeDetail,
+    phase,
     resolveEnsBatch,
     totalOwnersSum,
   ]);
@@ -597,17 +610,11 @@ export function ProgressiveCollectors({
     setStatusLine("Pausing after the current request…");
   }
 
-  const busy = phase === "counting" || phase === "detailing";
-  const countPct =
-    total === 0 ? 100 : Math.round((countProgress / Math.max(1, total)) * 100);
-  const detailPct =
-    total === 0 ? 100 : Math.round((detailProgress / Math.max(1, total)) * 100);
+  const busy = phase === "running";
+  const jobPct =
+    total === 0 ? 100 : Math.round((jobProgress / Math.max(1, total)) * 100);
   const activePct =
-    phase === "counting" || phase === "paused_count"
-      ? countPct
-      : phase === "detailing" || phase === "paused_detail" || phase === "detailed"
-        ? detailPct
-        : 0;
+    phase === "running" || phase === "paused" || phase === "done" ? jobPct : 0;
 
   const artistEvmUrl = evmNowAddressUrl(artist, 1);
 
@@ -716,15 +723,15 @@ export function ProgressiveCollectors({
           <div className="stat-cell">
             <span className="stat-cell__label">Owners</span>
             <span className="stat-cell__value">
-              {totalOwnersSum > 0 ? totalOwnersSum.toLocaleString() : "—"}
+              {totalOwnersSum > 0 ? totalOwnersSum.toLocaleString("en-US") : "—"}
             </span>
           </div>
           <div className="stat-cell">
             <span className="stat-cell__label">Unique collectors</span>
             <span className="stat-cell__value">
               {uniqueCount > 0
-                ? uniqueCount.toLocaleString()
-                : phase === "counting"
+                ? uniqueCount.toLocaleString("en-US")
+                : phase === "running"
                   ? "…"
                   : "—"}
             </span>
@@ -759,69 +766,34 @@ export function ProgressiveCollectors({
         <p className="filter-meta share-note">{shareNote}</p>
       )}
 
-      {(busy ||
-        phase === "paused_count" ||
-        phase === "paused_detail" ||
-        phase === "counted" ||
-        phase === "detailed") && (
+      {(busy || phase === "paused" || phase === "done") && (
         <div className="load-bar-wrap">
           <div className="load-bar" style={{ width: `${activePct}%` }} />
         </div>
       )}
 
-      {/* Job actions — buttons only */}
+      {/* Job actions */}
       <div className="load-actions load-actions--center" style={{ marginBottom: 16, gap: 10 }}>
-        {phase === "counting" || phase === "detailing" ? (
+        {phase === "running" ? (
           <button type="button" className="search-button" onClick={pause}>
             Pause
           </button>
-        ) : null}
-
-        {phase === "paused_count" ? (
-          <button
-            type="button"
-            className="search-button"
-            onClick={() => void runUniqueCount()}
-          >
-            Resume unique count
-          </button>
-        ) : phase !== "counting" && phase !== "detailing" ? (
+        ) : (
           <button
             type="button"
             className="search-button"
             disabled={busy}
-            onClick={() => void runUniqueCount()}
+            onClick={() => void runCollectors()}
           >
-            {countProgress > 0 && countProgress < total
-              ? "Continue unique count"
-              : uniqueCount > 0
-                ? "Recalculate unique"
-                : "Calculate unique collectors"}
+            {phase === "paused"
+              ? "Resume"
+              : jobProgress > 0 && jobProgress < total
+                ? "Continue"
+                : collectors.length > 0 || uniqueCount > 0
+                  ? "Recalculate collectors"
+                  : "Get collectors"}
           </button>
-        ) : null}
-
-        {phase === "paused_detail" ? (
-          <button
-            type="button"
-            className="search-button"
-            onClick={() => void runDetails()}
-          >
-            Resume details
-          </button>
-        ) : phase !== "counting" && phase !== "detailing" ? (
-          <button
-            type="button"
-            className="search-button"
-            disabled={busy}
-            onClick={() => void runDetails()}
-          >
-            {detailProgress > 0 && detailProgress < total
-              ? "Continue details"
-              : collectors.length > 0
-                ? "Reload collector details"
-                : "Get collector details"}
-          </button>
-        ) : null}
+        )}
 
         <button
           type="button"
@@ -843,9 +815,9 @@ export function ProgressiveCollectors({
       </div>
 
       <p className="filter-meta job-note">
-        To save you time, unique collectors and collector details aren&apos;t
-        calculated on the initial load — you can run them now. Note: if you have
-        a large audience, collector details can take longer.
+        Unique count and full list are not loaded on open — run{" "}
+        <strong>Get collectors</strong> once (same walk does both). Large
+        audiences take longer.
       </p>
 
       {(statusLine || (currentName && busy)) && (
@@ -873,13 +845,11 @@ export function ProgressiveCollectors({
         <h2 className="section-title">Created collections</h2>
         <CollectionsTable
           collections={collections}
-          canAdd={phase !== "counting" && phase !== "detailing"}
+          canAdd={phase !== "running"}
           addingMissed={addingMissed}
           onAddMissed={onAddMissedCollections}
           onRemoveAdded={
-            phase !== "counting" && phase !== "detailing"
-              ? onRemoveAddedCollection
-              : undefined
+            phase !== "running" ? onRemoveAddedCollection : undefined
           }
         />
       </section>
@@ -892,19 +862,20 @@ export function ProgressiveCollectors({
         <h2 className="section-title">Collectors</h2>
         {collectors.length === 0 ? (
           <div className="empty-state">
-            {phase === "detailing" || phase === "paused_detail"
-              ? "Detail rows appear as each collection finishes…"
+            {phase === "running" || phase === "paused"
+              ? "Collector rows appear as each collection finishes…"
               : (
                 <>
-                  Use <strong>Get collector details</strong> for the full list.
+                  Use <strong>Get collectors</strong> for the unique count and
+                  full list.
                 </>
               )}
           </div>
         ) : (
           <>
             <p className="filter-meta">
-              {collectors.length.toLocaleString()} wallets · 100 per page
-              {phase === "detailing" ? " · still growing" : ""}
+              {collectors.length.toLocaleString("en-US")} wallets · 100 per page
+              {phase === "running" ? " · still growing" : ""}
             </p>
             <CollectorsTable
               collectors={collectors}

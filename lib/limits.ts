@@ -15,8 +15,20 @@ export const LIMITS = {
   maxCollections: intEnv("COLLECTORFO_MAX_COLLECTIONS", 200),
   /** Pages of collection discovery from OpenSea */
   maxCollectionListPages: intEnv("COLLECTORFO_MAX_COLLECTION_PAGES", 40),
-  /** Holder pages per collection (100 per page) — one collection at a time */
-  maxHolderPages: intEnv("COLLECTORFO_MAX_HOLDER_PAGES", 100),
+  /**
+   * Holder pages per server request chunk (100 wallets/page).
+   * Client continues with nextCursor until OpenSea is exhausted (exact counts).
+   * Keep modest so each Vercel invocation stays under maxDuration.
+   */
+  maxHolderPagesPerRequest: intEnv("COLLECTORFO_HOLDER_PAGES_PER_REQUEST", 40),
+  /**
+   * Absolute safety cap on total holder pages per collection across all chunks.
+   * Default ~500k wallets (5000 * 100). Raise via env if a collection is larger.
+   * Set very high so “exact” is the normal path for real collections.
+   */
+  maxHolderPagesTotal: intEnv("COLLECTORFO_MAX_HOLDER_PAGES_TOTAL", 5000),
+  /** @deprecated use maxHolderPagesPerRequest — kept for older env names */
+  maxHolderPages: intEnv("COLLECTORFO_MAX_HOLDER_PAGES", 40),
   /** Delay between holder page requests (ms) to stay under rate limits */
   holderPageDelayMs: intEnv("COLLECTORFO_HOLDER_PAGE_DELAY_MS", 250),
   /** Delay between finishing one collection and starting the next (ms) */

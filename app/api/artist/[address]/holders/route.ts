@@ -12,10 +12,11 @@ type RouteContext = {
 };
 
 /**
- * Holders for a single collection slug.
- * Query: ?slug=opepen-edition
+ * Holders for a single collection slug (one chunk).
+ * Query: ?slug=…&cursor=… (optional resume)
  *
- * Loaded one collection at a time from the UI to respect OpenSea rate limits.
+ * Client continues until hasMore is false for an exact holder list.
+ * Chunk size keeps each invocation under serverless maxDuration.
  */
 export async function GET(request: Request, context: RouteContext) {
   // address reserved for future auth / ownership checks
@@ -23,6 +24,7 @@ export async function GET(request: Request, context: RouteContext) {
 
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug")?.trim();
+  const cursor = searchParams.get("cursor")?.trim() || null;
 
   if (!slug) {
     return NextResponse.json({ error: "Missing ?slug=" }, { status: 400 });
@@ -30,7 +32,8 @@ export async function GET(request: Request, context: RouteContext) {
 
   try {
     const data = await fetchHoldersForCollection(slug, {
-      maxPages: LIMITS.maxHolderPages,
+      maxPages: LIMITS.maxHolderPagesPerRequest ?? LIMITS.maxHolderPages,
+      cursor,
     });
     return NextResponse.json(data, {
       headers: { "Cache-Control": "no-store" },

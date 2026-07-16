@@ -303,17 +303,35 @@ type HoldersPage = {
   next_cursor?: string | null;
 };
 
+/**
+ * Fetch holders for a collection, optionally resuming from `cursor`.
+ * Stops after `maxPages` OpenSea pages for this call (chunk), or when the
+ * list ends. If more pages remain, returns nextCursor so the client can continue.
+ */
 export async function getOpenSeaCollectionHolders(
   slug: string,
-  options?: { maxPages?: number; pageSize?: number; pageDelayMs?: number }
-): Promise<{ holders: OpenSeaHolder[]; truncated: boolean }> {
-  const maxPages = options?.maxPages ?? 15;
+  options?: {
+    maxPages?: number;
+    pageSize?: number;
+    pageDelayMs?: number;
+    cursor?: string | null;
+  }
+): Promise<{
+  holders: OpenSeaHolder[];
+  /** True when this chunk stopped early but OpenSea has more pages */
+  hasMore: boolean;
+  nextCursor: string | null;
+  pagesFetched: number;
+}> {
+  const maxPages = options?.maxPages ?? 40;
   const pageSize = options?.pageSize ?? 100;
   const pageDelayMs = options?.pageDelayMs ?? 300;
   const holders: OpenSeaHolder[] = [];
   const seen = new Set<string>();
-  let cursor: string | undefined;
-  let truncated = false;
+  let cursor: string | undefined = options?.cursor?.trim() || undefined;
+  let pagesFetched = 0;
+  let nextCursor: string | null = null;
+  let hasMore = false;
 
   for (let page = 0; page < maxPages; page++) {
     if (page > 0 && pageDelayMs > 0) {
@@ -327,6 +345,7 @@ export async function getOpenSeaCollectionHolders(
         cursor,
       }
     );
+    pagesFetched += 1;
 
     for (const row of data.holders ?? []) {
       const raw = row.address ?? row.owner ?? row.wallet;
@@ -343,14 +362,22 @@ export async function getOpenSeaCollectionHolders(
 
     const next = data.next ?? data.next_cursor ?? undefined;
     if (!next) {
-      truncated = false;
+      hasMore = false;
+      nextCursor = null;
       break;
     }
     cursor = next;
-    if (page === maxPages - 1) truncated = true;
+    nextCursor = next;
+    hasMore = true;
+    // Continue loop until maxPages for this chunk
   }
 
-  return { holders, truncated };
+  // If we exited the for-loop by hitting maxPages with a next cursor, hasMore stays true
+  if (pagesFetched >= maxPages && nextCursor) {
+    hasMore = true;
+  }
+
+  return { holders, hasMore, nextCursor: hasMore ? nextCursor : null, pagesFetched };
 }
 
 export function openSeaChainToSupported(chain: string): SupportedChain | undefined {

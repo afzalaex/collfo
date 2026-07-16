@@ -61,13 +61,13 @@ export function buildTweetText(opts: {
   const { label, collections, owners, unique } = opts;
   const count =
     unique > 0
-      ? `${unique.toLocaleString()} unique collectors`
+      ? `${unique.toLocaleString("en-US")} unique collectors`
       : owners > 0
-        ? `~${owners.toLocaleString()} owners`
+        ? `~${owners.toLocaleString("en-US")} owners`
         : "collectors";
 
   return [
-    `${label} · ${count} across ${collections.toLocaleString()} collection${collections === 1 ? "" : "s"} on Ethereum & L2s.`,
+    `${label} · ${count} across ${collections.toLocaleString("en-US")} collection${collections === 1 ? "" : "s"} on Ethereum & L2s.`,
     "",
     "Find every collector of an artist with Collectorfo",
   ].join("\n");

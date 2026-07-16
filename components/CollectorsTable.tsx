@@ -164,8 +164,8 @@ export function CollectorsTable({
             disabled={filtered.length === 0}
             title={
               collectors.length !== filtered.length
-                ? `Download ${filtered.length.toLocaleString()} filtered rows as CSV`
-                : `Download ${filtered.length.toLocaleString()} collectors as CSV`
+                ? `Download ${filtered.length.toLocaleString("en-US")} filtered rows as CSV`
+                : `Download ${filtered.length.toLocaleString("en-US")} collectors as CSV`
             }
             onClick={() => downloadCollectorsCsv(filtered, filenameBase)}
           >
@@ -178,9 +178,9 @@ export function CollectorsTable({
         <p className="filter-meta" style={{ margin: 0 }}>
           {filtered.length === 0
             ? "No collectors"
-            : `Showing ${from}–${to} of ${filtered.length.toLocaleString()} collectors`}
+            : `Showing ${from}–${to} of ${filtered.length.toLocaleString("en-US")} collectors`}
           {collectors.length !== filtered.length
-            ? ` (filtered from ${collectors.length.toLocaleString()})`
+            ? ` (filtered from ${collectors.length.toLocaleString("en-US")})`
             : ""}
           {" · "}
           Results aren&apos;t saved — download before you leave.

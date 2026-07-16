@@ -261,7 +261,7 @@ export async function discoverArtist(
     message: [
       `Found ${collections.length} created collection(s) for ${walletLabel}.`,
       totalOwnersSum > 0
-        ? `Σ OpenSea owners ≈ ${totalOwnersSum.toLocaleString()} (upper bound, not unique).`
+        ? `Σ OpenSea owners ≈ ${totalOwnersSum.toLocaleString("en-US")} (upper bound, not unique).`
         : "",
       resolved.length > 1
         ? resolved
@@ -282,27 +282,35 @@ export type CollectionHoldersResult = {
   slug: string;
   holders: Array<{ address: string; quantity: number }>;
   uniqueOwners: number;
-  truncated: boolean;
+  /** True when more OpenSea pages remain — client should pass nextCursor */
+  hasMore: boolean;
+  nextCursor: string | null;
   pagesFetched: number;
+  /** @deprecated use hasMore — kept so older clients still typecheck */
+  truncated: boolean;
 };
 
 /**
- * Slow step: holders for a single collection (with pacing + 429 retries in osFetch).
+ * One chunk of holders for a collection (cursor-resumable).
+ * Client loops with nextCursor until hasMore is false for an exact full list.
  */
 export async function fetchHoldersForCollection(
   slug: string,
-  options?: { maxPages?: number }
+  options?: { maxPages?: number; cursor?: string | null }
 ): Promise<CollectionHoldersResult> {
-  const maxPages = options?.maxPages ?? LIMITS.maxHolderPages;
+  const maxPages =
+    options?.maxPages ??
+    LIMITS.maxHolderPagesPerRequest ??
+    LIMITS.maxHolderPages;
   const pageSize = 100;
 
-  // Use existing paginated helper; add inter-page delay via env by wrapping if needed
-  // For finer control, reimplement with delay here:
-  const { holders, truncated } = await getOpenSeaCollectionHolders(slug, {
-    maxPages,
-    pageSize,
-    pageDelayMs: LIMITS.holderPageDelayMs,
-  });
+  const { holders, hasMore, nextCursor, pagesFetched } =
+    await getOpenSeaCollectionHolders(slug, {
+      maxPages,
+      pageSize,
+      pageDelayMs: LIMITS.holderPageDelayMs,
+      cursor: options?.cursor,
+    });
 
   return {
     slug,
@@ -311,8 +319,10 @@ export async function fetchHoldersForCollection(
       quantity: h.quantity ?? 1,
     })),
     uniqueOwners: holders.length,
-    truncated,
-    pagesFetched: Math.ceil(holders.length / pageSize) || 0,
+    hasMore,
+    nextCursor,
+    pagesFetched,
+    truncated: hasMore,
   };
 }
 
@@ -436,16 +446,33 @@ export async function getArtistCollectors(
     const slug = col.openseaSlug;
     if (!slug) continue;
     try {
-      const result = await fetchHoldersForCollection(slug);
-      collections[i] = { ...col, uniqueOwners: result.uniqueOwners };
+      // Exact walk: chunk until OpenSea has no more pages
+      const allHolders: Array<{ address: string; quantity: number }> = [];
+      const seen = new Set<string>();
+      let cursor: string | null = null;
+      let complete = false;
+      for (let chunk = 0; chunk < 200; chunk++) {
+        const result = await fetchHoldersForCollection(slug, { cursor });
+        for (const h of result.holders) {
+          if (seen.has(h.address)) continue;
+          seen.add(h.address);
+          allHolders.push(h);
+        }
+        if (!result.hasMore || !result.nextCursor) {
+          complete = true;
+          break;
+        }
+        cursor = result.nextCursor;
+      }
+      collections[i] = { ...col, uniqueOwners: allHolders.length };
       mergeCollectorMaps(
         collectorMap,
-        result.holders,
+        allHolders,
         `slug:${slug}`,
         col.chainKey
       );
-      if (result.truncated) {
-        warnings.push(`${slug}: holder list truncated`);
+      if (!complete) {
+        warnings.push(`${slug}: holder walk hit safety cap`);
       }
       if (i < collections.length - 1 && LIMITS.collectionGapMs > 0) {
         await new Promise((r) => setTimeout(r, LIMITS.collectionGapMs));
