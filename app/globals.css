@@ -560,6 +560,8 @@ a {
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+  flex: 1 1 200px;
+  max-width: 280px;
 }
 
 .filter-field--check {
@@ -569,6 +571,11 @@ a {
   padding-bottom: 10px;
 }
 
+.filter-field--action {
+  flex: 0 0 auto;
+  max-width: none;
+}
+
 .filter-label {
   font-size: 0.72rem;
   color: var(--color-text-muted);
@@ -576,25 +583,62 @@ a {
   letter-spacing: 0.05em;
 }
 
+/* Override .search-input flex (which stretches tall inside column .filter-field) */
 .filter-input {
-  min-width: 180px;
+  flex: none !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  box-sizing: border-box;
   padding: 10px 12px;
   font-size: 0.82rem;
 }
 
 .filter-select {
-  background: var(--color-bg-default);
-  color: var(--color-text-default);
+  flex: none;
+  width: 100%;
+  min-width: 9.5rem;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+  color: #fff;
   border: 1px solid #fff;
-  padding: 10px 12px;
+  /* Extra right padding so text doesn’t collide with the chevron */
+  padding: 10px 36px 10px 12px;
   font-family: inherit;
   font-size: 0.82rem;
+  line-height: 1.25;
   outline: none;
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.filter-select:focus {
-  background: var(--color-ui-hover-bg);
+.filter-select:hover,
+.filter-select:focus,
+.filter-select:focus-visible {
+  background-color: #fff;
+  color: #000;
+  /* Black chevron on white fill */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23000000' stroke-width='1.5' stroke-linecap='square'/%3E%3C/svg%3E");
+  outline: none;
+}
+
+/* IE/legacy edge arrow */
+.filter-select::-ms-expand {
+  display: none;
+}
+
+/* Keep option menu readable in the OS dropdown */
+.filter-select option {
+  background: #000;
+  color: #fff;
 }
 
 .filter-meta {
@@ -755,10 +799,6 @@ a {
   scroll-margin-top: calc(var(--navbar-height) + 16px);
 }
 
-.filter-field--action {
-  min-width: 0;
-}
-
 .filter-action-btn {
   appearance: none;
   background: transparent;
@@ -799,6 +839,36 @@ a {
 .missed-inline__input {
   flex: 1 1 220px;
   min-width: 0;
+}
+
+.th-actions,
+.td-actions {
+  width: 2.5rem;
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.row-remove-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 1.15rem;
+  line-height: 1;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.row-remove-btn:hover,
+.row-remove-btn:focus-visible {
+  color: #fff;
+  border-color: #fff;
+  outline: none;
 }
 
 .pager-bar {

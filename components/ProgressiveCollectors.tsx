@@ -91,7 +91,6 @@ export function ProgressiveCollectors({
   const runningRef = useRef(false);
 
   const total = collections.length;
-  const ownersKnown = collections.filter((c) => c.uniqueOwners != null).length;
 
   const uniqueCount = useMemo(() => {
     void version;
@@ -129,6 +128,35 @@ export function ProgressiveCollectors({
       block: "start",
     });
   }, []);
+
+  const onRemoveAddedCollection = useCallback((slug: string) => {
+    const key = slug.toLowerCase();
+    const target = collections.find(
+      (c) =>
+        c.discovery === "user_added" &&
+        c.openseaSlug?.toLowerCase() === key
+    );
+    if (!target) return;
+
+    if (typeof target.uniqueOwners === "number") {
+      setTotalOwnersSum((sum) => Math.max(0, sum - target.uniqueOwners!));
+    }
+    setCollections((prev) =>
+      prev.filter(
+        (c) =>
+          !(
+            c.discovery === "user_added" &&
+            c.openseaSlug?.toLowerCase() === key
+          )
+      )
+    );
+    countDoneRef.current.delete(key);
+    detailDoneRef.current.delete(key);
+    // Unique/detail totals may include this collection — re-run jobs to refresh
+    if (uniqueSetRef.current.size > 0 || detailMapRef.current.size > 0) {
+      setPhase("idle");
+    }
+  }, [collections]);
 
   /** Returns a status note for the collections table UI */
   const onAddMissedCollections = useCallback(
@@ -825,38 +853,29 @@ export function ProgressiveCollectors({
         className="collections-section"
       >
         <h2 className="section-title">Created collections</h2>
-        <p className="filter-meta">
-          {ownersKnown}/{total} with OpenSea owner counts
-          {totalOwnersSum > 0
-            ? ` · Σ ${totalOwnersSum.toLocaleString()} (not unique)`
-            : ""}
-        </p>
         <CollectionsTable
           collections={collections}
           canAdd={phase !== "counting" && phase !== "detailing"}
           addingMissed={addingMissed}
           onAddMissed={onAddMissedCollections}
+          onRemoveAdded={
+            phase !== "counting" && phase !== "detailing"
+              ? onRemoveAddedCollection
+              : undefined
+          }
         />
       </section>
 
       <h2 className="section-title">Collectors</h2>
       {collectors.length === 0 ? (
         <div className="empty-state">
-          {phase === "detailing" || phase === "paused_detail" ? (
-            "Detail rows appear as each collection finishes…"
-          ) : uniqueCount > 0 ? (
-            <>
-              Unique total is <strong>{uniqueCount.toLocaleString()}</strong>.
-              Run <strong>Get collector details</strong> for the full wallet
-              table (ENS, ranking, export-friendly list).
-            </>
-          ) : (
-            <>
-              Initial results are collections + owner counts only. Use{" "}
-              <strong>Calculate unique collectors</strong> for the number, or{" "}
-              <strong>Get collector details</strong> for the full list.
-            </>
-          )}
+          {phase === "detailing" || phase === "paused_detail"
+            ? "Detail rows appear as each collection finishes…"
+            : (
+              <>
+                Use <strong>Get collector details</strong> for the full list.
+              </>
+            )}
         </div>
       ) : (
         <>

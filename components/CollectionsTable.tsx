@@ -13,6 +13,8 @@ type Props = {
   collections: CollectionSummary[];
   /** Lookup & merge OpenSea slugs/URLs the user pastes */
   onAddMissed?: (input: string) => Promise<string | null>;
+  /** Remove a manually added collection (by OpenSea slug) */
+  onRemoveAdded?: (slug: string) => void;
   addingMissed?: boolean;
   canAdd?: boolean;
 };
@@ -20,6 +22,7 @@ type Props = {
 export function CollectionsTable({
   collections,
   onAddMissed,
+  onRemoveAdded,
   addingMissed = false,
   canAdd = true,
 }: Props) {
@@ -167,6 +170,7 @@ export function CollectionsTable({
             <th>Chain</th>
             <th>Contract</th>
             <th>Holders</th>
+            {onRemoveAdded ? <th className="th-actions" aria-label="Actions" /> : null}
           </tr>
         </thead>
         <tbody>
@@ -179,6 +183,9 @@ export function CollectionsTable({
               ? c.openseaSlug ?? c.contractAddress
               : shortenAddress(c.contractAddress, 4);
             const evmUrl = evmNowAddressUrl(c.contractAddress, c.chainId);
+            const canRemove =
+              c.discovery === "user_added" &&
+              Boolean(onRemoveAdded && c.openseaSlug);
             return (
               <tr key={`${c.openseaSlug ?? c.contractAddress}-${c.chainKey}`}>
                 <td>
@@ -216,6 +223,21 @@ export function CollectionsTable({
                   )}
                 </td>
                 <td>{c.uniqueOwners ?? "—"}</td>
+                {onRemoveAdded ? (
+                  <td className="td-actions">
+                    {canRemove ? (
+                      <button
+                        type="button"
+                        className="row-remove-btn"
+                        aria-label={`Remove ${c.name ?? c.openseaSlug}`}
+                        title="Remove added collection"
+                        onClick={() => onRemoveAdded(c.openseaSlug!)}
+                      >
+                        ×
+                      </button>
+                    ) : null}
+                  </td>
+                ) : null}
               </tr>
             );
           })}
