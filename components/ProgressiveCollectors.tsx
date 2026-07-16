@@ -77,6 +77,7 @@ export function ProgressiveCollectors({
 
   const [addingMissed, setAddingMissed] = useState(false);
   const collectionsSectionRef = useRef<HTMLElement | null>(null);
+  const collectorsSectionRef = useRef<HTMLElement | null>(null);
 
   /** Unique-only pass */
   const uniqueSetRef = useRef(new Set<string>());
@@ -124,6 +125,13 @@ export function ProgressiveCollectors({
 
   const scrollToCollections = useCallback(() => {
     collectionsSectionRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const scrollToCollectors = useCallback(() => {
+    collectorsSectionRef.current?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
@@ -822,6 +830,16 @@ export function ProgressiveCollectors({
         >
           Browse collections
         </button>
+
+        {collectors.length > 0 ? (
+          <button
+            type="button"
+            className="search-button"
+            onClick={scrollToCollectors}
+          >
+            Browse collectors
+          </button>
+        ) : null}
       </div>
 
       <p className="filter-meta job-note">
@@ -866,26 +884,36 @@ export function ProgressiveCollectors({
         />
       </section>
 
-      <h2 className="section-title">Collectors</h2>
-      {collectors.length === 0 ? (
-        <div className="empty-state">
-          {phase === "detailing" || phase === "paused_detail"
-            ? "Detail rows appear as each collection finishes…"
-            : (
-              <>
-                Use <strong>Get collector details</strong> for the full list.
-              </>
-            )}
-        </div>
-      ) : (
-        <>
-          <p className="filter-meta">
-            {collectors.length.toLocaleString()} wallets · 100 per page
-            {phase === "detailing" ? " · still growing" : ""}
-          </p>
-          <CollectorsTable collectors={collectors} pageSize={100} />
-        </>
-      )}
+      <section
+        ref={collectorsSectionRef}
+        id="collectors"
+        className="collectors-section"
+      >
+        <h2 className="section-title">Collectors</h2>
+        {collectors.length === 0 ? (
+          <div className="empty-state">
+            {phase === "detailing" || phase === "paused_detail"
+              ? "Detail rows appear as each collection finishes…"
+              : (
+                <>
+                  Use <strong>Get collector details</strong> for the full list.
+                </>
+              )}
+          </div>
+        ) : (
+          <>
+            <p className="filter-meta">
+              {collectors.length.toLocaleString()} wallets · 100 per page
+              {phase === "detailing" ? " · still growing" : ""}
+            </p>
+            <CollectorsTable
+              collectors={collectors}
+              pageSize={100}
+              filenameBase={artistLabel}
+            />
+          </>
+        )}
+      </section>
     </div>
   );
 }

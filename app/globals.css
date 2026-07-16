@@ -795,7 +795,8 @@ a {
   line-height: 1.55;
 }
 
-.collections-section {
+.collections-section,
+.collectors-section {
   scroll-margin-top: calc(var(--navbar-height) + 16px);
 }
 

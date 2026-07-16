@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CollectorSummary } from "@/lib/types";
 import { shortenAddress } from "@/lib/address";
+import { downloadCollectorsCsv } from "@/lib/export-collectors-csv";
 
 type SortKey = "collectionCount" | "tokenCount" | "address" | "ens";
 type SortDir = "asc" | "desc";
@@ -10,9 +11,15 @@ type SortDir = "asc" | "desc";
 type Props = {
   collectors: CollectorSummary[];
   pageSize?: number;
+  /** Used in the downloaded CSV filename */
+  filenameBase?: string;
 };
 
-export function CollectorsTable({ collectors, pageSize = 100 }: Props) {
+export function CollectorsTable({
+  collectors,
+  pageSize = 100,
+  filenameBase = "collectors",
+}: Props) {
   const [query, setQuery] = useState("");
   const [minCollections, setMinCollections] = useState(1);
   const [hasEnsOnly, setHasEnsOnly] = useState(false);
@@ -149,6 +156,22 @@ export function CollectorsTable({ collectors, pageSize = 100 }: Props) {
           </select>
         </label>
 
+        <div className="filter-field filter-field--action">
+          <span className="filter-label">Export</span>
+          <button
+            type="button"
+            className="filter-action-btn"
+            disabled={filtered.length === 0}
+            title={
+              collectors.length !== filtered.length
+                ? `Download ${filtered.length.toLocaleString()} filtered rows as CSV`
+                : `Download ${filtered.length.toLocaleString()} collectors as CSV`
+            }
+            onClick={() => downloadCollectorsCsv(filtered, filenameBase)}
+          >
+            Download CSV
+          </button>
+        </div>
       </div>
 
       <div className="pager-bar">
@@ -159,6 +182,8 @@ export function CollectorsTable({ collectors, pageSize = 100 }: Props) {
           {collectors.length !== filtered.length
             ? ` (filtered from ${collectors.length.toLocaleString()})`
             : ""}
+          {" · "}
+          Results aren&apos;t saved — download before you leave.
         </p>
         <div className="pager-controls">
           <button
