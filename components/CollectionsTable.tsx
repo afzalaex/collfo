@@ -29,6 +29,7 @@ export function CollectionsTable({
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("holders");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortOpen, setSortOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [missedInput, setMissedInput] = useState("");
   const [missedNote, setMissedNote] = useState<string | null>(null);
@@ -87,21 +88,59 @@ export function CollectionsTable({
         </label>
         <label className="filter-field">
           <span className="filter-label">Sort</span>
-          <select
-            className="filter-select"
-            value={`${sortKey}:${sortDir}`}
-            onChange={(e) => {
-              const [k, d] = e.target.value.split(":") as [SortKey, SortDir];
-              setSortKey(k);
-              setSortDir(d);
+          <div
+            className="custom-select-wrap"
+            tabIndex={-1}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget)) {
+                setSortOpen(false);
+              }
             }}
           >
-            <option value="holders:desc">Holders ↓</option>
-            <option value="holders:asc">Holders ↑</option>
-            <option value="name:asc">Name A–Z</option>
-            <option value="name:desc">Name Z–A</option>
-            <option value="chain:asc">Chain A–Z</option>
-          </select>
+            <button
+              type="button"
+              className="filter-select"
+              onClick={() => setSortOpen((o) => !o)}
+              style={{ textAlign: "left" }}
+            >
+              {(() => {
+                const val = `${sortKey}:${sortDir}`;
+                if (val === "holders:desc") return "Holders ↓";
+                if (val === "holders:asc") return "Holders ↑";
+                if (val === "name:asc") return "Name A–Z";
+                if (val === "name:desc") return "Name Z–A";
+                if (val === "chain:asc") return "Chain A–Z";
+                return "Sort…";
+              })()}
+            </button>
+            {sortOpen && (
+              <div className="custom-select-options">
+                {[
+                  { value: "holders:desc", label: "Holders ↓" },
+                  { value: "holders:asc", label: "Holders ↑" },
+                  { value: "name:asc", label: "Name A–Z" },
+                  { value: "name:desc", label: "Name Z–A" },
+                  { value: "chain:asc", label: "Chain A–Z" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`custom-select-option ${
+                      `${sortKey}:${sortDir}` === opt.value ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      const [k, d] = opt.value.split(":") as [SortKey, SortDir];
+                      setSortKey(k);
+                      setSortDir(d);
+                      setSortOpen(false);
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </label>
         {canAdd && onAddMissed ? (
           <div className="filter-field filter-field--action">

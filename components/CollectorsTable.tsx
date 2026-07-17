@@ -24,6 +24,7 @@ export function CollectorsTable({
   const [hasEnsOnly, setHasEnsOnly] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("collectionCount");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [sortOpen, setSortOpen] = useState(false);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
@@ -114,24 +115,65 @@ export function CollectorsTable({
 
         <label className="filter-field">
           <span className="filter-label">Sort</span>
-          <select
-            className="filter-select"
-            value={`${sortKey}:${sortDir}`}
-            onChange={(e) => {
-              const [k, d] = e.target.value.split(":") as [SortKey, SortDir];
-              setSortKey(k);
-              setSortDir(d);
+          <div
+            className="custom-select-wrap"
+            tabIndex={-1}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget)) {
+                setSortOpen(false);
+              }
             }}
           >
-            <option value="collectionCount:desc">Collections ↓</option>
-            <option value="collectionCount:asc">Collections ↑</option>
-            <option value="tokenCount:desc">Tokens ↓</option>
-            <option value="tokenCount:asc">Tokens ↑</option>
-            <option value="ens:asc">ENS A–Z</option>
-            <option value="ens:desc">ENS Z–A</option>
-            <option value="address:asc">Address A–Z</option>
-            <option value="address:desc">Address Z–A</option>
-          </select>
+            <button
+              type="button"
+              className="filter-select"
+              onClick={() => setSortOpen((o) => !o)}
+              style={{ textAlign: "left" }}
+            >
+              {(() => {
+                const val = `${sortKey}:${sortDir}`;
+                if (val === "collectionCount:desc") return "Collections ↓";
+                if (val === "collectionCount:asc") return "Collections ↑";
+                if (val === "tokenCount:desc") return "Tokens ↓";
+                if (val === "tokenCount:asc") return "Tokens ↑";
+                if (val === "ens:asc") return "ENS A–Z";
+                if (val === "ens:desc") return "ENS Z–A";
+                if (val === "address:asc") return "Address A–Z";
+                if (val === "address:desc") return "Address Z–A";
+                return "Sort…";
+              })()}
+            </button>
+            {sortOpen && (
+              <div className="custom-select-options">
+                {[
+                  { value: "collectionCount:desc", label: "Collections ↓" },
+                  { value: "collectionCount:asc", label: "Collections ↑" },
+                  { value: "tokenCount:desc", label: "Tokens ↓" },
+                  { value: "tokenCount:asc", label: "Tokens ↑" },
+                  { value: "ens:asc", label: "ENS A–Z" },
+                  { value: "ens:desc", label: "ENS Z–A" },
+                  { value: "address:asc", label: "Address A–Z" },
+                  { value: "address:desc", label: "Address Z–A" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`custom-select-option ${
+                      `${sortKey}:${sortDir}` === opt.value ? "active" : ""
+                    }`}
+                    onClick={() => {
+                      const [k, d] = opt.value.split(":") as [SortKey, SortDir];
+                      setSortKey(k);
+                      setSortDir(d);
+                      setSortOpen(false);
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </label>
 
         <div className="filter-field filter-field--action">
