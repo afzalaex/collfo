@@ -20,6 +20,7 @@ import {
 export type ArtistWalletLabel = {
   address: string;
   ens: string | null;
+  input?: string;
 };
 
 type Props = {
