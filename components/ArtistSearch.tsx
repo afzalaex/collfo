@@ -101,10 +101,6 @@ export function ArtistSearch({ initial = "" }: Props) {
 
   return (
     <form className="search-form" onSubmit={onSubmit}>
-      <label className="search-label" htmlFor="artist-address">
-        Artist wallet(s), ENS, or OS username
-      </label>
-
       <div className="wallet-chip-field">
         {wallets.map((w, i) => (
           <span key={`${w}-${i}`} className="wallet-chip">
@@ -121,6 +117,7 @@ export function ArtistSearch({ initial = "" }: Props) {
         ))}
         <input
           id="artist-address"
+          aria-label="Artist wallet(s), ENS, or OS username"
           className="wallet-chip-input"
           name="address"
           value={draft}
@@ -156,7 +153,7 @@ export function ArtistSearch({ initial = "" }: Props) {
       {error && <p className="search-error">{error}</p>}
 
       <p className="search-hint">
-        Multi-wallet: type a wallet, ENS, or OpenSea username, press <strong>Enter</strong> to add
+        For artists with Multi-wallet: type a wallet, ENS, or OpenSea username, press <strong>Enter</strong> to add
         another (comma works too), then search. Collections from all wallets are
         merged. Max 10.
       </p>
