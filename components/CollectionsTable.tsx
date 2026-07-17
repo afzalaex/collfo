@@ -78,7 +78,7 @@ export function CollectionsTable({
             className="search-input filter-input"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Name, slug, chain…"
+            placeholder="Name, contract, chain…"
             autoComplete="off"
             spellCheck={false}
           />
