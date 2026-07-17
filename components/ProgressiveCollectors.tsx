@@ -78,18 +78,20 @@ export function ProgressiveCollectors({
     title: string;
     message?: string;
     defaultValue?: string;
+    okText?: string;
+    cancelText?: string;
     resolve: (val: any) => void;
   } | null>(null);
 
-  const confirmAction = useCallback((title: string, message?: string) => {
+  const confirmAction = useCallback((title: string, message?: string, okText = "OK", cancelText = "Cancel") => {
     return new Promise<boolean>((resolve) => {
-      setDialog({ type: "confirm", title, message, resolve });
+      setDialog({ type: "confirm", title, message, okText, cancelText, resolve });
     });
   }, []);
 
-  const promptAction = useCallback((title: string, defaultValue: string) => {
+  const promptAction = useCallback((title: string, defaultValue: string, okText = "OK", cancelText = "Cancel") => {
     return new Promise<string | null>((resolve) => {
-      setDialog({ type: "prompt", title, defaultValue, resolve });
+      setDialog({ type: "prompt", title, defaultValue, okText, cancelText, resolve });
     });
   }, []);
 
@@ -130,7 +132,6 @@ export function ProgressiveCollectors({
     try {
       const dataUrl = await captureShareCard();
       downloadDataUrl(dataUrl, shareFilename(artistLabel));
-      setShareNote("Image saved");
     } catch (err) {
       setShareNote(err instanceof Error ? err.message : "Could not save image");
     } finally {
@@ -268,22 +269,25 @@ export function ProgressiveCollectors({
     setShareNote(null);
     try {
       const dataUrl = await captureShareCard();
-      downloadDataUrl(dataUrl, shareFilename(artistLabel));
       const copied = await copyImageToClipboard(dataUrl);
-      openTweetIntent(
-        buildTweetText({
-          label: artistLabel,
-          collections: total,
-          owners: totalOwnersSum,
-          unique: uniqueCount,
-        }),
-        MARKETING_URL
+
+      const proceed = await confirmAction(
+        copied ? "Image is copied" : "Image saved",
+        copied ? "Paste in your post" : "Attach it to your post",
+        "Post"
       );
-      setShareNote(
-        copied
-          ? "Image saved & copied — paste it into your tweet"
-          : "Image saved — attach it to your tweet"
-      );
+
+      if (proceed) {
+        openTweetIntent(
+          buildTweetText({
+            label: artistLabel,
+            collections: total,
+            owners: totalOwnersSum,
+            unique: uniqueCount,
+          }),
+          MARKETING_URL
+        );
+      }
     } catch (err) {
       setShareNote(err instanceof Error ? err.message : "Could not prepare tweet");
     } finally {
@@ -992,7 +996,7 @@ export function ProgressiveCollectors({
                   setDialog(null);
                 }}
               >
-                Cancel
+                {dialog.cancelText || "Cancel"}
               </button>
               <button
                 className="search-button"
@@ -1006,7 +1010,7 @@ export function ProgressiveCollectors({
                   setDialog(null);
                 }}
               >
-                OK
+                {dialog.okText || "OK"}
               </button>
             </div>
           </div>

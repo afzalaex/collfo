@@ -707,17 +707,21 @@ a {
   width: 100%;
   background: #000;
   border: 1px solid var(--color-border-default);
-  padding: 28px 24px 20px;
+  padding: 68px 24px 44px;
   margin-bottom: 0;
+  position: relative;
 }
 
 .share-card__brand {
+  position: absolute;
+  top: 28px;
+  left: 24px;
   font-family: var(--font-display);
   font-size: 1.1rem;
   letter-spacing: 0.04em;
   text-transform: lowercase;
   color: #fff;
-  margin-bottom: 20px;
+  margin: 0;
 }
 
 .share-card__eyebrow {
@@ -738,7 +742,10 @@ a {
 }
 
 .share-card__footer {
-  margin: 18px 0 0;
+  position: absolute;
+  bottom: 20px;
+  right: 24px;
+  margin: 0;
   font-size: 0.72rem;
   color: var(--color-text-muted);
   letter-spacing: 0.04em;
