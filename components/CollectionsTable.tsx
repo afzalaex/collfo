@@ -124,7 +124,7 @@ export function CollectionsTable({
       {showAdd && canAdd && onAddMissed ? (
         <div className="missed-inline">
           <p className="filter-meta" style={{ marginBottom: 8 }}>
-            OpenSea can miss collections. Paste slug(s) or collection URLs.
+            Collfo can miss collections. Paste Opensea collection slug(s) or URLs.
           </p>
           <div className="missed-inline__row">
             <input

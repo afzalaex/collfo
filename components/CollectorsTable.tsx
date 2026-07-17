@@ -21,7 +21,6 @@ export function CollectorsTable({
   filenameBase = "collectors",
 }: Props) {
   const [query, setQuery] = useState("");
-  const [minCollections, setMinCollections] = useState(1);
   const [hasEnsOnly, setHasEnsOnly] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("collectionCount");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -31,7 +30,6 @@ export function CollectorsTable({
     const q = query.trim().toLowerCase();
 
     let rows = collectors.filter((c) => {
-      if (c.collectionCount < minCollections) return false;
       if (hasEnsOnly && !c.ens) return false;
       if (!q) return true;
       return (
@@ -63,7 +61,7 @@ export function CollectorsTable({
     });
 
     return rows;
-  }, [collectors, query, minCollections, hasEnsOnly, sortKey, sortDir]);
+  }, [collectors, query, hasEnsOnly, sortKey, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -76,7 +74,7 @@ export function CollectorsTable({
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [query, minCollections, hasEnsOnly, sortKey, sortDir, collectors.length]);
+  }, [query, hasEnsOnly, sortKey, sortDir, collectors.length]);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -110,29 +108,9 @@ export function CollectorsTable({
           />
         </label>
 
-        <label className="filter-field">
-          <span className="filter-label">Min collections</span>
-          <select
-            className="filter-select"
-            value={minCollections}
-            onChange={(e) => setMinCollections(Number(e.target.value))}
-          >
-            {[1, 2, 3, 5, 10].map((n) => (
-              <option key={n} value={n}>
-                {n}+
-              </option>
-            ))}
-          </select>
-        </label>
 
-        <label className="filter-field filter-field--check">
-          <span className="filter-label">ENS only</span>
-          <input
-            type="checkbox"
-            checked={hasEnsOnly}
-            onChange={(e) => setHasEnsOnly(e.target.checked)}
-          />
-        </label>
+
+
 
         <label className="filter-field">
           <span className="filter-label">Sort</span>
@@ -183,9 +161,18 @@ export function CollectorsTable({
             ? ` (filtered from ${collectors.length.toLocaleString("en-US")})`
             : ""}
           {" · "}
-          Results aren&apos;t saved — download before you leave.
+          Results aren&apos;t saved — please download before you leave.
         </p>
         <div className="pager-controls">
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.78rem", cursor: "pointer", marginRight: 8 }}>
+            ENS only
+            <input
+              type="checkbox"
+              checked={hasEnsOnly}
+              onChange={(e) => setHasEnsOnly(e.target.checked)}
+              style={{ margin: 0 }}
+            />
+          </label>
           <button
             type="button"
             className="pager-btn"

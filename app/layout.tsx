@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SiteFooter } from "@/components/SiteFooter";
+import { PoweredBy } from "@/components/PoweredBy";
 import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>
+          <PoweredBy />
           <SiteFooter />
         </div>
         <Analytics />

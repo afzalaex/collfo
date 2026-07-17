@@ -73,6 +73,26 @@ export function ProgressiveCollectors({
   const collectionsSectionRef = useRef<HTMLElement | null>(null);
   const collectorsSectionRef = useRef<HTMLElement | null>(null);
 
+  const [dialog, setDialog] = useState<{
+    type: "confirm" | "prompt";
+    title: string;
+    message?: string;
+    defaultValue?: string;
+    resolve: (val: any) => void;
+  } | null>(null);
+
+  const confirmAction = useCallback((title: string, message?: string) => {
+    return new Promise<boolean>((resolve) => {
+      setDialog({ type: "confirm", title, message, resolve });
+    });
+  }, []);
+
+  const promptAction = useCallback((title: string, defaultValue: string) => {
+    return new Promise<string | null>((resolve) => {
+      setDialog({ type: "prompt", title, defaultValue, resolve });
+    });
+  }, []);
+
   /** Unique-only pass */
   const uniqueSetRef = useRef(new Set<string>());
   const countDoneRef = useRef(new Set<string>());
@@ -502,7 +522,24 @@ export function ProgressiveCollectors({
       phase === "paused" ||
       (detailDoneRef.current.size > 0 && remaining.length > 0);
 
-    // Full re-run: wipe previous walk
+    if (!isResume) {
+      const estimated =
+        totalOwnersSum > 0
+          ? `Estimated total owners: ${totalOwnersSum.toLocaleString("en-US")} (not unique). `
+          : "";
+      const ok = await confirmAction(
+        "Load unique collectors + full details?",
+        [
+          `Collections: ${collections.length}`,
+          estimated +
+            "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
+          "Can take many minutes for large artists.",
+        ].join("\n\n")
+      );
+      if (!ok) return;
+    }
+
+    // Full re-run: wipe previous walk AFTER user confirms
     if (!isResume && (detailDoneRef.current.size > 0 || uniqueSetRef.current.size > 0)) {
       uniqueSetRef.current.clear();
       detailMapRef.current.clear();
@@ -510,26 +547,6 @@ export function ProgressiveCollectors({
       detailDoneRef.current.clear();
       ensDoneRef.current.clear();
       setVersion((v) => v + 1);
-    }
-
-    if (!isResume) {
-      const estimated =
-        totalOwnersSum > 0
-          ? `Σ owners ≈ ${totalOwnersSum.toLocaleString("en-US")} (not unique). `
-          : "";
-      const ok = window.confirm(
-        [
-          "Load unique collectors + full details?",
-          "",
-          `Collections: ${collections.length}`,
-          estimated +
-            "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
-          "Can take many minutes for large artists. OpenSea rate limits apply.",
-          "",
-          "Continue?",
-        ].join("\n")
-      );
-      if (!ok) return;
     }
 
     runningRef.current = true;
@@ -626,7 +643,7 @@ export function ProgressiveCollectors({
     <div className="progressive">
       {/* Capture target: artist identity + stats */}
       <div ref={shareCardRef} className="share-card">
-        <div className="share-card__brand">collfo</div>
+        {sharing && <div className="share-card__brand">collfo</div>}
 
         <p className="page-eyebrow share-card__eyebrow">
           {wallets.length > 1 ? `Artist · ${wallets.length} wallets` : "Artist"}
@@ -641,15 +658,15 @@ export function ProgressiveCollectors({
                   data-share-ignore="true"
                   className="edit-name-btn"
                   title="Edit name for share card"
-                  onClick={() => {
-                    const label = prompt(
+                  onClick={async () => {
+                    const label = await promptAction(
                       "Edit artist name for the share card:",
                       customLabel ?? `${wallets.length} wallets`
                     );
                     if (label !== null) setCustomLabel(label.trim() || null);
                   }}
                 >
-                  ✎
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </button>
               </span>
               <span className="wallet-sub mono">
@@ -666,15 +683,15 @@ export function ProgressiveCollectors({
                   data-share-ignore="true"
                   className="edit-name-btn"
                   title="Edit name for share card"
-                  onClick={() => {
-                    const label = prompt(
+                  onClick={async () => {
+                    const label = await promptAction(
                       "Edit artist name for the share card:",
                       customLabel ?? artistEns ?? openseaUsername ?? ""
                     );
                     if (label !== null) setCustomLabel(label.trim() || null);
                   }}
                 >
-                  ✎
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </button>
               </span>
               <span className="wallet-sub mono">
@@ -710,12 +727,12 @@ export function ProgressiveCollectors({
                 data-share-ignore="true"
                 className="edit-name-btn"
                 title="Edit name for share card"
-                onClick={() => {
-                  const label = prompt("Edit artist name for the share card:", customLabel || "");
+                onClick={async () => {
+                  const label = await promptAction("Edit artist name for the share card:", customLabel || "");
                   if (label !== null) setCustomLabel(label.trim() || null);
                 }}
               >
-                ✎
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               </button>
             </span>
           )}
@@ -768,7 +785,7 @@ export function ProgressiveCollectors({
             <span className="stat-cell__value">{total}</span>
           </div>
           <div className="stat-cell">
-            <span className="stat-cell__label">Owners</span>
+            <span className="stat-cell__label">Collectors</span>
             <span className="stat-cell__value">
               {totalOwnersSum > 0 ? totalOwnersSum.toLocaleString("en-US") : "—"}
             </span>
@@ -785,7 +802,7 @@ export function ProgressiveCollectors({
           </div>
         </div>
 
-        <p className="share-card__footer">{MARKETING_URL.replace(/^https?:\/\//, "")}</p>
+        {sharing && <p className="share-card__footer">{MARKETING_URL.replace(/^https?:\/\//, "")}</p>}
       </div>
 
       <div className="share-actions">
@@ -837,8 +854,8 @@ export function ProgressiveCollectors({
               : jobProgress > 0 && jobProgress < total
                 ? "Continue"
                 : collectors.length > 0 || uniqueCount > 0
-                  ? "Recalculate collectors"
-                  : "Get collectors"}
+                  ? "Reload collectors"
+                  : "Load collectors"}
           </button>
         )}
 
@@ -861,11 +878,16 @@ export function ProgressiveCollectors({
         ) : null}
       </div>
 
-      <p className="filter-meta job-note">
-        Unique count and full list are not loaded on open — run{" "}
-        <strong>Get collectors</strong> once (same walk does both). Large
-        audiences take longer.
-      </p>
+      {phase !== "done" && collectors.length === 0 && (
+        <div className="filter-meta job-note">
+          <p style={{ margin: "0 0 8px 0" }}>
+            To improve performance, only collection details and the total collector count are loaded initially. Click <strong>Load Collectors</strong> to fetch the unique collector count and the complete collector list.
+          </p>
+          <p style={{ margin: 0 }}>
+            <em>Note: This may take some time, especially for artists with larger collectors base. In case it takes longer than expected keep this tab open check back in some time.</em>
+          </p>
+        </div>
+      )}
 
       {(statusLine || (currentName && busy)) && (
         <p className="filter-meta" style={{ marginBottom: 20 }}>
@@ -932,6 +954,64 @@ export function ProgressiveCollectors({
           </>
         )}
       </section>
+
+      {dialog && (
+        <div className="custom-dialog-overlay">
+          <div className="custom-dialog">
+            <h3 className="custom-dialog__title">{dialog.title}</h3>
+            {dialog.message && (
+              <p className="custom-dialog__message" style={{ whiteSpace: "pre-wrap" }}>
+                {dialog.message}
+              </p>
+            )}
+            {dialog.type === "prompt" && (
+              <input
+                type="text"
+                className="search-input"
+                style={{ width: "100%", boxSizing: "border-box", marginBottom: 16 }}
+                defaultValue={dialog.defaultValue}
+                id="dialog-prompt-input"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const val = (e.currentTarget as HTMLInputElement).value;
+                    dialog.resolve(val);
+                    setDialog(null);
+                  } else if (e.key === "Escape") {
+                    dialog.resolve(null);
+                    setDialog(null);
+                  }
+                }}
+              />
+            )}
+            <div className="custom-dialog__actions">
+              <button
+                className="search-button"
+                onClick={() => {
+                  dialog.resolve(dialog.type === "confirm" ? false : null);
+                  setDialog(null);
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="search-button"
+                onClick={() => {
+                  if (dialog.type === "confirm") {
+                    dialog.resolve(true);
+                  } else {
+                    const val = (document.getElementById("dialog-prompt-input") as HTMLInputElement).value;
+                    dialog.resolve(val);
+                  }
+                  setDialog(null);
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
