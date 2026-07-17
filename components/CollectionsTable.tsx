@@ -6,7 +6,7 @@ import { chainById } from "@/lib/chains";
 import { shortenAddress } from "@/lib/address";
 import { evmNowAddressUrl } from "@/lib/evm-now";
 
-type SortKey = "name" | "holders" | "chain";
+type SortKey = "name" | "holders";
 type SortDir = "asc" | "desc";
 
 type Props = {
@@ -29,7 +29,6 @@ export function CollectionsTable({
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("holders");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [sortOpen, setSortOpen] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
   const [missedInput, setMissedInput] = useState("");
   const [missedNote, setMissedNote] = useState<string | null>(null);
@@ -52,8 +51,6 @@ export function CollectionsTable({
         cmp = (a.name ?? "").localeCompare(b.name ?? "");
       } else if (sortKey === "holders") {
         cmp = (a.uniqueOwners ?? 0) - (b.uniqueOwners ?? 0);
-      } else {
-        cmp = a.chainKey.localeCompare(b.chainKey);
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -88,77 +85,46 @@ export function CollectionsTable({
         </label>
         <label className="filter-field">
           <span className="filter-label">Sort</span>
-          <div
-            className="custom-select-wrap"
-            tabIndex={-1}
-            onBlur={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget)) {
-                setSortOpen(false);
-              }
-            }}
-          >
+          <div className="sort-tabs">
             <button
               type="button"
-              className="filter-select"
-              onClick={() => setSortOpen((o) => !o)}
-              style={{ textAlign: "left" }}
-            >
-              {(() => {
-                const val = `${sortKey}:${sortDir}`;
-                if (val === "holders:desc") return "Holders ↓";
-                if (val === "holders:asc") return "Holders ↑";
-                if (val === "name:asc") return "Name A–Z";
-                if (val === "name:desc") return "Name Z–A";
-                if (val === "chain:asc") return "Chain A–Z";
-                return "Sort…";
-              })()}
-            </button>
-            {sortOpen && (
-              <div className="custom-select-options">
-                {[
-                  { value: "holders:desc", label: "Holders ↓" },
-                  { value: "holders:asc", label: "Holders ↑" },
-                  { value: "name:asc", label: "Name A–Z" },
-                  { value: "name:desc", label: "Name Z–A" },
-                  { value: "chain:asc", label: "Chain A–Z" },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`custom-select-option ${
-                      `${sortKey}:${sortDir}` === opt.value ? "active" : ""
-                    }`}
-                    onClick={() => {
-                      const [k, d] = opt.value.split(":") as [SortKey, SortDir];
-                      setSortKey(k);
-                      setSortDir(d);
-                      setSortOpen(false);
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </label>
-        {canAdd && onAddMissed ? (
-          <div className="filter-field filter-field--action">
-            <span className="filter-label">Options</span>
-            <button
-              type="button"
-              className="filter-action-btn"
-              disabled={addingMissed}
+              className={`sort-tab ${sortKey === "holders" ? "active" : ""}`}
               onClick={() => {
-                setShowAdd((v) => !v);
-                setMissedNote(null);
+                if (sortKey === "holders") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("holders"); setSortDir("desc"); }
               }}
             >
-              {showAdd ? "Hide add form" : "Add missed collection(s)"}
+              Holders {sortKey === "holders" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+            </button>
+            <button
+              type="button"
+              className={`sort-tab ${sortKey === "name" ? "active" : ""}`}
+              onClick={() => {
+                if (sortKey === "name") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("name"); setSortDir("asc"); }
+              }}
+            >
+              Name {sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
           </div>
-        ) : null}
+        </label>
       </div>
+
+      {canAdd && onAddMissed ? (
+        <div style={{ marginBottom: 16 }}>
+          <button
+            type="button"
+            className="filter-action-btn"
+            disabled={addingMissed}
+            onClick={() => {
+              setShowAdd((v) => !v);
+              setMissedNote(null);
+            }}
+          >
+            {showAdd ? "Hide add form" : "Add missed collection(s)"}
+          </button>
+        </div>
+      ) : null}
 
       {showAdd && canAdd && onAddMissed ? (
         <div className="missed-inline">

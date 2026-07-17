@@ -24,7 +24,6 @@ export function CollectorsTable({
   const [hasEnsOnly, setHasEnsOnly] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("collectionCount");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [sortOpen, setSortOpen] = useState(false);
   const [page, setPage] = useState(1);
 
   const filtered = useMemo(() => {
@@ -115,64 +114,47 @@ export function CollectorsTable({
 
         <label className="filter-field">
           <span className="filter-label">Sort</span>
-          <div
-            className="custom-select-wrap"
-            tabIndex={-1}
-            onBlur={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget)) {
-                setSortOpen(false);
-              }
-            }}
-          >
+          <div className="sort-tabs">
             <button
               type="button"
-              className="filter-select"
-              onClick={() => setSortOpen((o) => !o)}
-              style={{ textAlign: "left" }}
+              className={`sort-tab ${sortKey === "collectionCount" ? "active" : ""}`}
+              onClick={() => {
+                if (sortKey === "collectionCount") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("collectionCount"); setSortDir("desc"); }
+              }}
             >
-              {(() => {
-                const val = `${sortKey}:${sortDir}`;
-                if (val === "collectionCount:desc") return "Collections ↓";
-                if (val === "collectionCount:asc") return "Collections ↑";
-                if (val === "tokenCount:desc") return "Tokens ↓";
-                if (val === "tokenCount:asc") return "Tokens ↑";
-                if (val === "ens:asc") return "ENS A–Z";
-                if (val === "ens:desc") return "ENS Z–A";
-                if (val === "address:asc") return "Address A–Z";
-                if (val === "address:desc") return "Address Z–A";
-                return "Sort…";
-              })()}
+              Collections {sortKey === "collectionCount" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
-            {sortOpen && (
-              <div className="custom-select-options">
-                {[
-                  { value: "collectionCount:desc", label: "Collections ↓" },
-                  { value: "collectionCount:asc", label: "Collections ↑" },
-                  { value: "tokenCount:desc", label: "Tokens ↓" },
-                  { value: "tokenCount:asc", label: "Tokens ↑" },
-                  { value: "ens:asc", label: "ENS A–Z" },
-                  { value: "ens:desc", label: "ENS Z–A" },
-                  { value: "address:asc", label: "Address A–Z" },
-                  { value: "address:desc", label: "Address Z–A" },
-                ].map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    className={`custom-select-option ${
-                      `${sortKey}:${sortDir}` === opt.value ? "active" : ""
-                    }`}
-                    onClick={() => {
-                      const [k, d] = opt.value.split(":") as [SortKey, SortDir];
-                      setSortKey(k);
-                      setSortDir(d);
-                      setSortOpen(false);
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              className={`sort-tab ${sortKey === "tokenCount" ? "active" : ""}`}
+              onClick={() => {
+                if (sortKey === "tokenCount") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("tokenCount"); setSortDir("desc"); }
+              }}
+            >
+              Tokens {sortKey === "tokenCount" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+            </button>
+            <button
+              type="button"
+              className={`sort-tab ${sortKey === "address" ? "active" : ""}`}
+              onClick={() => {
+                if (sortKey === "address") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("address"); setSortDir("asc"); }
+              }}
+            >
+              Address {sortKey === "address" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+            </button>
+            <button
+              type="button"
+              className={`sort-tab ${sortKey === "ens" ? "active" : ""}`}
+              onClick={() => {
+                if (sortKey === "ens") setSortDir(d => d === "asc" ? "desc" : "asc");
+                else { setSortKey("ens"); setSortDir("asc"); }
+              }}
+            >
+              ENS {sortKey === "ens" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+            </button>
           </div>
         </label>
 
