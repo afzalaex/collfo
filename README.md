@@ -2,8 +2,6 @@
 
 **Every collector of an artist** — all collections OpenSea attributes to them, one merged holder list.
 
-Branding matches [aex-site](../aex-site).
-
 ---
 
 ## How it works (OpenSea technique)
