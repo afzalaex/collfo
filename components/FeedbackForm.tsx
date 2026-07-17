@@ -121,7 +121,7 @@ export function FeedbackForm() {
               <div className="contact-modal-header">
                 <div className="contact-modal-copy">
                   <p id="homepage-contact-title" className="mail-box-title">
-                    LET ME HELP YOU IMPROVE COLLFO
+                    Submit Feedback
                   </p>
                 </div>
                 <button
