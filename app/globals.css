@@ -168,8 +168,7 @@ a {
 .page-shell--home .page-title {
   margin: 0 auto 12px;
   width: 100%;
-  max-width: 36rem;
-  font-size: clamp(2rem, 6vw, 3.125rem);
+  font-size: clamp(2rem, 5vw, 2.85rem);
   text-align: center;
 }
 
