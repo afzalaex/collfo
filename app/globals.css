@@ -166,7 +166,8 @@ a {
 }
 
 .page-shell--home .page-title {
-  margin-bottom: 12px;
+  margin: 0 auto 12px;
+  max-width: 36rem;
   text-align: center;
 }
 
