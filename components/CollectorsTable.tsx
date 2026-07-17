@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { CollectorSummary } from "@/lib/types";
 import { shortenAddress } from "@/lib/address";
 import { downloadCollectorsCsv } from "@/lib/export-collectors-csv";
-import { chainByKey } from "@/lib/chains";
 
 type SortKey = "collectionCount" | "tokenCount" | "address" | "ens";
 type SortDir = "asc" | "desc";
@@ -285,33 +284,7 @@ export function CollectorsTable({
                   </td>
                   <td>{c.collectionCount}</td>
                   <td>{c.tokenCount}</td>
-                  <td>
-                    {c.chains.map((ch, idx) => {
-                      const chain = chainByKey(ch);
-                      const isLast = idx === c.chains.length - 1;
-                      if (chain?.explorer) {
-                        return (
-                          <span key={ch}>
-                            <a
-                              href={`${chain.explorer}/address/${c.address}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="address-link"
-                            >
-                              {ch}
-                            </a>
-                            {!isLast && ", "}
-                          </span>
-                        );
-                      }
-                      return (
-                        <span key={ch}>
-                          {ch}
-                          {!isLast && ", "}
-                        </span>
-                      );
-                    })}
-                  </td>
+                  <td>{c.chains.join(", ")}</td>
                 </tr>
               );
             })}
