@@ -96,7 +96,7 @@ export function CollectorsTable({
   return (
     <div className="collectors-panel">
       <div className="filters-bar">
-        <label className="filter-field">
+        <label className="filter-field" style={{ flex: "1 1 auto" }}>
           <span className="filter-label">Search</span>
           <input
             className="search-input filter-input"
@@ -112,7 +112,7 @@ export function CollectorsTable({
 
 
 
-        <label className="filter-field">
+        <label className="filter-field" style={{ flex: "0 0 auto" }}>
           <span className="filter-label">Sort</span>
           <div className="sort-tabs">
             <button
