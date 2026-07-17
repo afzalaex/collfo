@@ -225,7 +225,7 @@ a {
 .layout-action-link {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.92);
+  color: var(--color-text-muted);
   font: inherit;
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -237,13 +237,11 @@ a {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  opacity: 0.7;
-  transition: opacity 120ms ease-in, color 120ms ease-in;
+  transition: color 120ms ease-in;
 }
 
 .layout-action-link:hover,
 .layout-action-link:focus-visible {
-  opacity: 1;
   color: #fff;
 }
 
