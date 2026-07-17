@@ -73,9 +73,7 @@ export default async function ArtistPage({ params }: PageProps) {
       )}
 
       <div style={{ marginTop: 48 }}>
-        <ArtistSearch
-          initial={data.wallets.map((w) => w.ens ?? w.address)}
-        />
+        <ArtistSearch initial={decodeURIComponent(address)} />
       </div>
     </div>
   );

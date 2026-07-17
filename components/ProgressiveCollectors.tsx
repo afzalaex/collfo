@@ -537,7 +537,7 @@ export function ProgressiveCollectors({
           `Collections: ${collections.length}`,
           estimated +
             "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
-          "Can take many minutes for large artists.",
+          "Can take many minutes for large artists. In case it takes much longer keep the tab open and check back in some time.",
         ].join("\n\n")
       );
       if (!ok) return;
