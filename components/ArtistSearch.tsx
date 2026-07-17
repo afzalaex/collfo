@@ -153,9 +153,11 @@ export function ArtistSearch({ initial = "" }: Props) {
       {error && <p className="search-error">{error}</p>}
 
       <p className="search-hint">
-        For artists with Multi-wallet: type a wallet, ENS, or OpenSea username, press <strong>Enter</strong> to add
-        another (comma works too), then search. Collections from all wallets are
-        merged. Max 10.
+        Type your wallet address, ENS name, or OpenSea username. If you use
+        multiple wallets, press <strong>Enter</strong> after each one to add
+        another (commas work too), then click <strong>Search</strong>.
+        Collections from all entered wallets will be merged into a single
+        result. Maximum 10 wallets.
       </p>
     </form>
   );
