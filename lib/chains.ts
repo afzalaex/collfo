@@ -15,7 +15,7 @@ export const SUPPORTED_CHAINS: SupportedChain[] = [
     key: "ethereum",
     name: "Ethereum",
     shortName: "ETH",
-    explorer: "https://etherscan.io",
+    explorer: "https://evm.now",
   },
   {
     id: 8453,
