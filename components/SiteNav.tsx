@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { FeedbackForm } from "./FeedbackForm";
 
 export function SiteNav() {
   return (
@@ -16,17 +15,6 @@ export function SiteNav() {
         <Link href="/" className="site-navbar__title">
           collfo
         </Link>
-        <div className="nav-actions">
-          <a
-            href="https://github.com/afzalaex/collfo"
-            target="_blank"
-            rel="noreferrer"
-            className="nav-action-link"
-          >
-            GitHub
-          </a>
-          <FeedbackForm />
-        </div>
       </div>
     </nav>
   );

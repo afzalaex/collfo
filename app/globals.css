@@ -212,133 +212,239 @@ a {
   }
 }
 
-/* Feedback Form & Nav Actions */
-.nav-actions {
+/* Feedback Form & Layout Actions */
+.layout-actions {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 16px;
-  margin-left: auto;
+  margin-top: 2rem;
+  margin-bottom: -1rem;
 }
 
-.nav-action-btn, .nav-action-link {
+.layout-action-link {
+  border: 1px solid transparent;
+  border-radius: 0;
   background: transparent;
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
+  color: rgba(255, 255, 255, 0.92);
+  font: inherit;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  padding: 6px 12px;
-  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin: 1px 0;
+  line-height: 1.58;
+  padding: 0 2px;
   cursor: pointer;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.2s ease;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  opacity: 0.7;
+  transition: opacity 120ms ease-in, border-color 120ms ease-in;
 }
 
-.nav-action-btn:hover, .nav-action-link:hover {
-  background: var(--color-bg-hover);
-  border-color: var(--color-text);
+.layout-action-link:hover,
+.layout-action-link:focus-visible {
+  opacity: 1;
+  border-color: #fff;
 }
 
-.feedback-overlay {
+.layout-action-link:focus-visible {
+  outline: none;
+}
+
+.contact-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
 }
 
-.feedback-modal {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  padding: 32px;
-  position: relative;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-  animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+.contact-modal {
+  width: min(100%, 560px);
+  max-height: min(100dvh - 48px, 760px);
+  overflow-y: auto;
+  border: 1px solid #fff;
+  background: #000;
+  padding: 20px;
 }
 
-@keyframes modal-pop {
-  0% { opacity: 0; transform: scale(0.96) translateY(10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.feedback-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: transparent;
-  border: none;
-  color: var(--color-text-muted);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
+.contact-modal-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
-.feedback-close-btn:hover {
-  color: var(--color-text);
-  background: var(--color-bg-hover);
-}
-
-.feedback-title {
-  margin-top: 0;
-  margin-bottom: 24px;
-  text-align: left;
-}
-
-.feedback-form {
+.contact-modal-copy {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 6px;
 }
 
-.feedback-field {
+.contact-close {
+  border: 1px solid #fff;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.contact-close::before,
+.contact-close::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 1px;
+  background: currentColor;
+  transform-origin: center;
+}
+
+.contact-close::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.contact-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.contact-close:hover,
+.contact-close:focus-visible {
+  background: #fff;
+  color: #000;
+}
+
+.contact-close:focus-visible {
+  outline: none;
+}
+
+.mail-box {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.honeypot-field {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mail-box-title {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #fff;
+  font-family: var(--font-mono);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-.feedback-field label {
-  font-size: 0.85rem;
-  color: var(--color-text-muted);
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.feedback-textarea {
+.field-label {
+  font-size: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.76);
+  font-family: var(--font-mono);
+}
+
+.field-input {
+  width: 100%;
+  border: 1px solid #fff;
+  border-radius: 0;
+  background: #000;
+  color: #fff;
+  font: inherit;
+  font-family: var(--font-mono);
+  padding: 12px 14px;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.field-input:hover {
+  background: #000;
+}
+
+.field-input:focus-visible {
+  outline: none;
+  border-color: #fff;
+  background: #000;
+}
+
+.field-textarea {
+  min-height: 160px;
   resize: vertical;
-  min-height: 120px;
-  line-height: 1.5;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
 }
 
-.feedback-status {
-  padding: 12px;
-  border-radius: 8px;
+.mail-box-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.mail-box-button {
+  align-self: flex-start;
+  border: 1px solid #fff;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
   font-family: var(--font-mono);
+  font-weight: 400;
+  padding: 11px 16px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease, opacity 120ms ease;
+}
+
+.mail-box-button:hover,
+.mail-box-button:focus-visible {
+  background: #fff;
+  color: #000;
+}
+
+.form-status {
+  margin: 0;
   font-size: 0.85rem;
-  text-align: center;
+  line-height: 1.4;
+  font-family: var(--font-mono);
 }
 
-.feedback-status--success {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
-  border: 1px solid rgba(46, 204, 113, 0.2);
+.form-status-success {
+  color: #a8ffb5;
 }
 
-.feedback-status--error {
-  background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
-  border: 1px solid rgba(231, 76, 60, 0.2);
+.form-status-error {
+  color: #ff9b9b;
 }
 .page-eyebrow {
   color: var(--color-text-muted);

@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SiteFooter } from "@/components/SiteFooter";
 import { PoweredBy } from "@/components/PoweredBy";
 import { SiteNav } from "@/components/SiteNav";
+import { FeedbackForm } from "@/components/FeedbackForm";
 import "./globals.css";
 
 const siteUrl = (process.env.SITE_URL?.trim() || "https://collfo.aex.design").replace(
@@ -57,6 +58,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>
+          <div className="layout-actions">
+            <a
+              href="https://github.com/afzalaex/collfo"
+              target="_blank"
+              rel="noreferrer"
+              className="layout-action-link"
+            >
+              Git-Repo
+            </a>
+            <FeedbackForm />
+          </div>
           <PoweredBy />
           <SiteFooter />
         </div>

@@ -100,91 +100,93 @@ export function FeedbackForm() {
 
   return (
     <>
-      <button className="nav-action-btn" onClick={handleOpen}>
+      <button
+        type="button"
+        className="layout-action-link"
+        onClick={handleOpen}
+      >
         Submit Feedback
       </button>
 
       {isOpen &&
         createPortal(
-          <div className="feedback-overlay" role="presentation" onClick={handleClose}>
+          <div className="contact-overlay" role="presentation" onClick={handleClose}>
             <div
-              className="feedback-modal"
+              className="contact-modal"
               role="dialog"
               aria-modal="true"
-              aria-labelledby="feedback-title"
+              aria-labelledby="homepage-contact-title"
               onClick={(event) => event.stopPropagation()}
             >
-              <button
-                aria-label="Close form"
-                className="feedback-close-btn"
-                type="button"
-                onClick={handleClose}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
-              </button>
+              <div className="contact-modal-header">
+                <div className="contact-modal-copy">
+                  <p id="homepage-contact-title" className="mail-box-title">
+                    LET ME HELP YOU IMPROVE COLLFO
+                  </p>
+                </div>
+                <button
+                  className="contact-close"
+                  type="button"
+                  aria-label="Close form"
+                  onClick={handleClose}
+                />
+              </div>
 
-              <h2 id="feedback-title" className="page-title feedback-title">
-                Submit Feedback
-              </h2>
-
-              <form className="feedback-form" onSubmit={handleSubmit}>
-                <div className="feedback-field" style={{ display: "none" }}>
-                  <label htmlFor="website">Website</label>
+              <form className="mail-box" onSubmit={handleSubmit}>
+                <label className="honeypot-field" aria-hidden="true" tabIndex={-1}>
+                  <span className="field-label">Website</span>
                   <input
-                    id="website"
+                    className="field-input"
                     type="text"
                     name="website"
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
+                    autoComplete="off"
                     tabIndex={-1}
-                    autoComplete="off"
                   />
+                </label>
+
+                <div className="field-grid">
+                  <label className="field" style={{ gridColumn: "1 / -1" }}>
+                    <span className="field-label">Name, Email or X Handle (optional)</span>
+                    <input
+                      className="field-input"
+                      type="text"
+                      name="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="off"
+                    />
+                  </label>
                 </div>
 
-                <div className="feedback-field">
-                  <label htmlFor="name" className="mono" style={{ textTransform: "uppercase" }}>Name, Email or X Handle</label>
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={isSubmitting}
-                    className="search-input"
-                    autoComplete="off"
-                    placeholder="Optional"
-                  />
-                </div>
-
-                <div className="feedback-field">
-                  <label htmlFor="idea" className="mono" style={{ textTransform: "uppercase" }}>Your Feedback</label>
+                <label className="field">
+                  <span className="field-label">Your Feedback</span>
                   <textarea
-                    id="idea"
+                    className="field-input field-textarea"
                     name="idea"
-                    required
                     value={idea}
                     onChange={(e) => setIdea(e.target.value)}
-                    disabled={isSubmitting}
-                    placeholder="report bug, send suggestions or just say what you feel about collfo"
-                    className="search-input feedback-textarea"
-                    rows={5}
+                    placeholder="Report bug, send suggestions or just say what you feel about collfo"
+                    required
                   />
+                </label>
+
+                <div className="mail-box-footer">
+                  <button className="mail-box-button" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Sending..." : "Submit"}
+                  </button>
+                  {statusMessage && (
+                    <p
+                      className={`form-status ${
+                        statusTone === "error" ? "form-status-error" : "form-status-success"
+                      }`}
+                      role={statusTone === "error" ? "alert" : "status"}
+                    >
+                      {statusMessage}
+                    </p>
+                  )}
                 </div>
-
-                {statusMessage && (
-                  <div className={`feedback-status feedback-status--${statusTone}`}>
-                    {statusMessage}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="search-btn feedback-submit-btn"
-                  style={{ marginTop: "8px" }}
-                >
-                  {isSubmitting ? "Sending..." : "Submit"}
-                </button>
               </form>
             </div>
           </div>,
