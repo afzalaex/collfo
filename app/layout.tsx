@@ -58,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>
+          <PoweredBy />
           <div className="layout-actions">
             <a
               href="https://github.com/afzalaex/collfo"
@@ -69,7 +70,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <FeedbackForm />
           </div>
-          <PoweredBy />
           <SiteFooter />
         </div>
         <Analytics />
