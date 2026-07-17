@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
 import "./globals.css";
 
-const siteUrl = (process.env.SITE_URL?.trim() || "https://collectorfo.aex.design").replace(
+const siteUrl = (process.env.SITE_URL?.trim() || "https://collfo.aex.design").replace(
   /\/+$/,
   ""
 );
@@ -17,7 +17,7 @@ const spaceMono = Space_Mono({
   variable: "--font-space-mono",
 });
 
-const title = "Collectorfo";
+const title = "Collfo";
 const description =
   "For artists minting on Ethereum and its L2s. See who holds your work across every collection you've created.";
 
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   applicationName: title,
   title: {
     default: title,
-    template: `%s · Collectorfo`,
+    template: `%s · Collfo`,
   },
   description,
   icons: {

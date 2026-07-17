@@ -30,7 +30,7 @@ export function ArtistSearch({ initial = "" }: Props) {
     const t = raw.trim();
     if (!t) return;
     if (!looksLikeWalletOrEns(t)) {
-      setError("Use a 0x address or name.eth");
+      setError("Use a 0x address, ENS, or OS username");
       return;
     }
     const key = t.toLowerCase();
@@ -78,7 +78,7 @@ export function ArtistSearch({ initial = "" }: Props) {
     const list = [...wallets];
     if (draft.trim()) {
       if (!looksLikeWalletOrEns(draft.trim())) {
-        setError("Use a 0x address or name.eth");
+        setError("Use a 0x address, ENS, or OS username");
         return;
       }
       if (!list.some((w) => w.toLowerCase() === draft.trim().toLowerCase())) {
@@ -86,7 +86,7 @@ export function ArtistSearch({ initial = "" }: Props) {
       }
     }
     if (!list.length) {
-      setError("Add at least one wallet or ENS");
+      setError("Add at least one wallet, ENS, or OS username");
       return;
     }
     setPending(true);
@@ -102,7 +102,7 @@ export function ArtistSearch({ initial = "" }: Props) {
   return (
     <form className="search-form" onSubmit={onSubmit}>
       <label className="search-label" htmlFor="artist-address">
-        Artist wallet(s) or ENS
+        Artist wallet(s), ENS, or OS username
       </label>
 
       <div className="wallet-chip-field">
@@ -132,7 +132,7 @@ export function ArtistSearch({ initial = "" }: Props) {
           placeholder={
             wallets.length
               ? "Add another · Enter"
-              : "0x… or name.eth · Enter to add more"
+              : "0x…, ENS, or OS username · Enter to add more"
           }
           autoComplete="off"
           spellCheck={false}
@@ -156,7 +156,7 @@ export function ArtistSearch({ initial = "" }: Props) {
       {error && <p className="search-error">{error}</p>}
 
       <p className="search-hint">
-        Multi-wallet: type a wallet or ENS, press <strong>Enter</strong> to add
+        Multi-wallet: type a wallet, ENS, or OpenSea username, press <strong>Enter</strong> to add
         another (comma works too), then search. Collections from all wallets are
         merged. Max 10.
       </p>

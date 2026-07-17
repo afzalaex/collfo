@@ -13,7 +13,7 @@ export function SiteNav() {
           <img src="/assets/logo.svg" alt="Aex Designs" width={80} height={28} />
         </a>
         <Link href="/" className="site-navbar__title">
-          collectorfo
+          collfo
         </Link>
       </div>
     </nav>

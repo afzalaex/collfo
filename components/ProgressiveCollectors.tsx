@@ -24,6 +24,7 @@ export type ArtistWalletLabel = {
 type Props = {
   artist: string;
   artistEns: string | null;
+  openseaUsername: string | null;
   wallets: ArtistWalletLabel[];
   collections: CollectionSummary[];
   /** Sum of per-collection owner counts from stats (not unique) */
@@ -51,10 +52,12 @@ function sleep(ms: number) {
 export function ProgressiveCollectors({
   artist,
   artistEns,
+  openseaUsername,
   wallets,
   collections: initial,
   totalOwnersSum: initialOwnersSum,
 }: Props) {
+  const [customLabel, setCustomLabel] = useState<string | null>(null);
   const [collections, setCollections] = useState(initial);
   const [totalOwnersSum, setTotalOwnersSum] = useState(initialOwnersSum);
   const [phase, setPhase] = useState<Phase>("idle");
@@ -90,9 +93,10 @@ export function ProgressiveCollectors({
   }, [version]);
 
   const artistLabel = useMemo(() => {
+    if (customLabel) return customLabel;
     if (wallets.length > 1) return `${wallets.length} wallets`;
-    return artistEns ?? shortenAddress(artist, 6);
-  }, [artist, artistEns, wallets]);
+    return artistEns ?? openseaUsername ?? shortenAddress(artist, 6);
+  }, [customLabel, artist, artistEns, openseaUsername, wallets]);
 
   const captureShareCard = useCallback(async () => {
     const el = shareCardRef.current;
@@ -622,7 +626,7 @@ export function ProgressiveCollectors({
     <div className="progressive">
       {/* Capture target: artist identity + stats */}
       <div ref={shareCardRef} className="share-card">
-        <div className="share-card__brand">collectorfo</div>
+        <div className="share-card__brand">collfo</div>
 
         <p className="page-eyebrow share-card__eyebrow">
           {wallets.length > 1 ? `Artist · ${wallets.length} wallets` : "Artist"}
@@ -631,16 +635,48 @@ export function ProgressiveCollectors({
         <h1 className="page-title share-card__title">
           {wallets.length > 1 ? (
             <>
-              <span className="ens-name">{wallets.length} wallets</span>
+              <span className="ens-name">
+                {customLabel || `${wallets.length} wallets`}
+                <button
+                  data-share-ignore="true"
+                  className="edit-name-btn"
+                  title="Edit name for share card"
+                  onClick={() => {
+                    const label = prompt(
+                      "Edit artist name for the share card:",
+                      customLabel ?? `${wallets.length} wallets`
+                    );
+                    if (label !== null) setCustomLabel(label.trim() || null);
+                  }}
+                >
+                  ✎
+                </button>
+              </span>
               <span className="wallet-sub mono">
                 {wallets
                   .map((w) => w.ens ?? shortenAddress(w.address, 4))
                   .join(" · ")}
               </span>
             </>
-          ) : artistEns ? (
+          ) : customLabel || artistEns || openseaUsername ? (
             <>
-              <span className="ens-name">{artistEns}</span>
+              <span className="ens-name">
+                {customLabel || artistEns || openseaUsername}
+                <button
+                  data-share-ignore="true"
+                  className="edit-name-btn"
+                  title="Edit name for share card"
+                  onClick={() => {
+                    const label = prompt(
+                      "Edit artist name for the share card:",
+                      customLabel ?? artistEns ?? openseaUsername ?? ""
+                    );
+                    if (label !== null) setCustomLabel(label.trim() || null);
+                  }}
+                >
+                  ✎
+                </button>
+              </span>
               <span className="wallet-sub mono">
                 {artistEvmUrl ? (
                   <a
@@ -670,6 +706,17 @@ export function ProgressiveCollectors({
               ) : (
                 artist
               )}
+              <button
+                data-share-ignore="true"
+                className="edit-name-btn"
+                title="Edit name for share card"
+                onClick={() => {
+                  const label = prompt("Edit artist name for the share card:", customLabel || "");
+                  if (label !== null) setCustomLabel(label.trim() || null);
+                }}
+              >
+                ✎
+              </button>
             </span>
           )}
         </h1>

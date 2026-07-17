@@ -48,9 +48,9 @@ export default async function ArtistPage({ params }: PageProps) {
                     .join(" · ")}
                 </span>
               </>
-            ) : data.artistEns ? (
+            ) : data.artistEns || data.openseaUsername ? (
               <>
-                <span className="ens-name">{data.artistEns}</span>
+                <span className="ens-name">{data.artistEns || data.openseaUsername}</span>
                 <span className="wallet-sub mono">{data.artist}</span>
               </>
             ) : (
@@ -65,6 +65,7 @@ export default async function ArtistPage({ params }: PageProps) {
         <ProgressiveCollectors
           artist={data.artist}
           artistEns={data.artistEns}
+          openseaUsername={data.openseaUsername}
           wallets={data.wallets}
           collections={data.collections}
           totalOwnersSum={data.totalOwnersSum}

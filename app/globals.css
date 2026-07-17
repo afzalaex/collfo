@@ -1020,3 +1020,20 @@ a {
   color: #fff;
   outline: none;
 }
+
+.edit-name-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.3;
+  cursor: pointer;
+  font-size: 0.6em;
+  margin-left: 8px;
+  vertical-align: middle;
+  transition: opacity 0.2s ease;
+  padding: 4px;
+}
+
+.edit-name-btn:hover {
+  opacity: 1;
+}

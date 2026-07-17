@@ -7,6 +7,7 @@ import {
 import { mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
 import { getAddress, isAddress } from "viem";
+import { resolveOpenSeaAccount } from "./providers/opensea";
 
 let client: PublicClient | null = null;
 
@@ -52,6 +53,18 @@ export async function resolveArtistInput(
     } catch {
       return null;
     }
+  }
+
+  try {
+    const osAccount = await resolveOpenSeaAccount(raw);
+    if (osAccount.address && isAddress(osAccount.address)) {
+      return {
+        address: getAddress(osAccount.address),
+        ens: osAccount.ens_name ?? null,
+      };
+    }
+  } catch {
+    // ignore opensea resolution error
   }
 
   return null;

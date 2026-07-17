@@ -25,5 +25,6 @@ export function looksLikeWalletOrEns(s: string): boolean {
   if (!t) return false;
   if (/^0x[a-fA-F0-9]{40}$/.test(t)) return true;
   if (/\.eth$/i.test(t) && t.length > 4 && !t.includes(" ")) return true;
+  if (/^[a-zA-Z0-9_-]{2,30}$/.test(t)) return true;
   return false;
 }

@@ -42,7 +42,7 @@ export function downloadCollectorsCsv(
     .replace(/[^a-z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 48);
-  const name = `collectorfo-${safe || "collectors"}.csv`;
+  const name = `collfo-${safe || "collectors"}.csv`;
   const blob = new Blob([collectorsToCsv(rows)], {
     type: "text/csv;charset=utf-8",
   });

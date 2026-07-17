@@ -1,6 +1,6 @@
 import { toPng } from "html-to-image";
 
-export const MARKETING_URL = "https://collectorfo.aex.design";
+export const MARKETING_URL = "https://collfo.aex.design";
 
 export async function captureElementPng(el: HTMLElement): Promise<string> {
   // Wait a frame so layout/fonts settle before rasterizing
@@ -69,7 +69,7 @@ export function buildTweetText(opts: {
   return [
     `${label} · ${count} across ${collections.toLocaleString("en-US")} collection${collections === 1 ? "" : "s"} on Ethereum & L2s.`,
     "",
-    "Find every collector of an artist with Collectorfo",
+    "Find every collector of an artist with Collfo",
   ].join("\n");
 }
 
@@ -79,5 +79,5 @@ export function shareFilename(label: string): string {
     .replace(/[^a-z0-9._-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 48);
-  return `collectorfo-${safe || "artist"}.png`;
+  return `collfo-${safe || "artist"}.png`;
 }

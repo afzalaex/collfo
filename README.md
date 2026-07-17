@@ -1,4 +1,4 @@
-# Collectorfo
+# Collfo
 
 **Every collector of an artist** — all collections OpenSea attributes to them, one merged holder list.
 
@@ -34,7 +34,7 @@ This is the same **created-by** index as OpenSea’s profile, not on-chain “wh
 ## Setup
 
 ```bash
-cd Collectorfo
+cd Collfo
 npm install
 npm run dev
 ```
@@ -55,7 +55,7 @@ That’s the **full** developer hub. Skip it for now — use the instant key abo
 For a longer-term key after approval:
 
 1. Verify a real email on [opensea.io](https://opensea.io) (not anonymous)
-2. Settings → Developer → Get access → describe Collectorfo
+2. Settings → Developer → Get access → describe Collfo
 3. Create key → `OPENSEA_API_KEY` in env / Vercel
 
 Deploy: `npx vercel` — either rely on instant keys or set `OPENSEA_API_KEY`.
