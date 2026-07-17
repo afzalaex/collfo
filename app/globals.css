@@ -106,37 +106,46 @@ a {
 .site-navbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
   width: 100%;
+  height: var(--navbar-height);
   background: var(--color-bg-default);
 }
 
 .site-navbar__content {
+  height: 100%;
   width: 100%;
   max-width: var(--layout-max-width);
-  margin: 0 auto;
-  min-height: var(--navbar-height);
-  padding: 12px max(var(--navbar-inline-pad), env(safe-area-inset-right)) 12px
-    max(var(--navbar-inline-pad), env(safe-area-inset-left));
+  margin-left: auto;
+  margin-right: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  position: relative;
+  z-index: 20;
+  padding: 0;
 }
 
 .site-navbar__logo {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  line-height: 0;
+  padding-left: max(var(--navbar-inline-pad), env(safe-area-inset-left));
 }
 
 .site-navbar__logo img {
   display: block;
-  height: 28px;
-  width: auto;
+  width: 80px;
+  height: 55px;
+  object-fit: contain;
+  object-position: left;
 }
 
 .site-navbar__title {
+  display: inline-flex;
+  align-items: center;
+  padding-right: max(var(--navbar-inline-pad), env(safe-area-inset-right));
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 3.5vw, 1.75rem);
   letter-spacing: 0.04em;

@@ -10,7 +10,16 @@ export function SiteNav() {
           target="_blank"
           rel="noreferrer"
         >
-          <img src="/assets/logo.svg" alt="Aex Designs" width={80} height={28} />
+          <span style={{ display: "contents" }}>
+            <img
+              src="/assets/logo.svg"
+              alt="Aex Designs"
+              width={80}
+              height={55}
+              decoding="async"
+              loading="eager"
+            />
+          </span>
         </a>
         <Link href="/" className="site-navbar__title">
           collfo
