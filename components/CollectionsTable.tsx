@@ -73,7 +73,7 @@ export function CollectionsTable({
     <div className="collectors-panel" id="collections-table">
       <div className="filters-bar">
         <label className="filter-field">
-          <span className="filter-label">Filter</span>
+          <span className="filter-label">Search</span>
           <input
             className="search-input filter-input"
             value={query}
@@ -104,7 +104,7 @@ export function CollectionsTable({
                 else { setSortKey("name"); setSortDir("asc"); }
               }}
             >
-              Name {sortKey === "name" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Name {sortKey === "name" ? (sortDir === "asc" ? " A–Z" : " Z–A") : ""}
             </button>
           </div>
         </label>

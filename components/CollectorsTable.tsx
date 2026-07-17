@@ -97,7 +97,7 @@ export function CollectorsTable({
     <div className="collectors-panel">
       <div className="filters-bar">
         <label className="filter-field">
-          <span className="filter-label">Filter</span>
+          <span className="filter-label">Search</span>
           <input
             className="search-input filter-input"
             value={query}
@@ -143,7 +143,7 @@ export function CollectorsTable({
                 else { setSortKey("address"); setSortDir("asc"); }
               }}
             >
-              Address {sortKey === "address" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Address {sortKey === "address" ? (sortDir === "asc" ? " A–Z" : " Z–A") : ""}
             </button>
             <button
               type="button"
@@ -153,7 +153,7 @@ export function CollectorsTable({
                 else { setSortKey("ens"); setSortDir("asc"); }
               }}
             >
-              ENS {sortKey === "ens" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              ENS {sortKey === "ens" ? (sortDir === "asc" ? " A–Z" : " Z–A") : ""}
             </button>
           </div>
         </label>
