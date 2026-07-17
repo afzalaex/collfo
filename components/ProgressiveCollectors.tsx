@@ -6,6 +6,7 @@ import { CollectorsTable } from "@/components/CollectorsTable";
 import { CollectionsTable } from "@/components/CollectionsTable";
 import { shortenAddress } from "@/lib/address";
 import { evmNowAddressUrl } from "@/lib/evm-now";
+import { formatMultiWalletTitle, formatWalletLabel } from "@/lib/wallets";
 import {
   buildTweetText,
   captureElementPng,
@@ -116,7 +117,7 @@ export function ProgressiveCollectors({
 
   const artistLabel = useMemo(() => {
     if (customLabel) return customLabel;
-    if (wallets.length > 1) return `${wallets.length} wallets`;
+    if (wallets.length > 1) return formatMultiWalletTitle(wallets);
     return artistEns ?? openseaUsername ?? shortenAddress(artist, 6);
   }, [customLabel, artist, artistEns, openseaUsername, wallets]);
 
@@ -657,7 +658,7 @@ export function ProgressiveCollectors({
           {wallets.length > 1 ? (
             <>
               <span className="ens-name">
-                {customLabel || `${wallets.length} wallets`}
+                {customLabel || formatMultiWalletTitle(wallets)}
                 <button
                   data-share-ignore="true"
                   className="edit-name-btn"
@@ -665,18 +666,13 @@ export function ProgressiveCollectors({
                   onClick={async () => {
                     const label = await promptAction(
                       "Edit artist name for the share card:",
-                      customLabel ?? `${wallets.length} wallets`
+                      customLabel ?? formatMultiWalletTitle(wallets)
                     );
                     if (label !== null) setCustomLabel(label.trim() || null);
                   }}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 </button>
-              </span>
-              <span className="wallet-sub mono">
-                {wallets
-                  .map((w) => w.ens ?? shortenAddress(w.address, 4))
-                  .join(" · ")}
               </span>
             </>
           ) : customLabel || artistEns || openseaUsername ? (
@@ -746,26 +742,16 @@ export function ProgressiveCollectors({
           <ul className="wallet-list share-card__wallets">
             {wallets.map((w) => {
               const url = evmNowAddressUrl(w.address, 1);
+              const nameLabel = w.ens || (w.input && !w.input.toLowerCase().startsWith("0x") ? w.input : null);
               return (
                 <li key={w.address} className="wallet-list__item mono">
-                  {w.ens ? (
+                  {nameLabel && (
                     <>
-                      <span className="ens-name">{w.ens}</span>
+                      <span className="ens-name">{nameLabel}</span>
                       <span className="muted"> · </span>
-                      {url ? (
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="Open on evm.now"
-                        >
-                          {w.address}
-                        </a>
-                      ) : (
-                        w.address
-                      )}
                     </>
-                  ) : url ? (
+                  )}
+                  {url ? (
                     <a
                       href={url}
                       target="_blank"

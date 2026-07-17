@@ -53,7 +53,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`theme-dark ${spaceMono.variable}`}>
-      <body>
+      <body suppressHydrationWarning>
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>

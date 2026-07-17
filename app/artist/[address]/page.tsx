@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { discoverArtist } from "@/lib/collectors";
 import { shortenAddress } from "@/lib/address";
-import { parseWalletsFromPath } from "@/lib/wallets";
+import { parseWalletsFromPath, formatMultiWalletTitle, formatWalletLabel } from "@/lib/wallets";
 import { ArtistSearch } from "@/components/ArtistSearch";
 import { ProgressiveCollectors } from "@/components/ProgressiveCollectors";
 
@@ -41,10 +41,10 @@ export default async function ArtistPage({ params }: PageProps) {
           <h1 className="page-title" style={{ fontSize: "clamp(1.4rem, 4vw, 2rem)" }}>
             {data.wallets.length > 1 ? (
               <>
-                <span className="ens-name">{data.wallets.length} wallets</span>
+                <span className="ens-name">{formatMultiWalletTitle(data.wallets)}</span>
                 <span className="wallet-sub mono">
                   {data.wallets
-                    .map((w) => w.ens ?? shortenAddress(w.address, 4))
+                    .map((w) => formatWalletLabel(w))
                     .join(" · ")}
                 </span>
               </>

@@ -3,6 +3,8 @@
  * Separators in URL: comma. UI uses Enter to add chips.
  */
 
+import { shortenAddress } from "./address";
+
 export function splitWalletQuery(raw: string): string[] {
   return raw
     .split(/[,;\n]+/)
@@ -27,4 +29,22 @@ export function looksLikeWalletOrEns(s: string): boolean {
   if (/\.eth$/i.test(t) && t.length > 4 && !t.includes(" ")) return true;
   if (/^[a-zA-Z0-9_-]{2,30}$/.test(t)) return true;
   return false;
+}
+
+export function formatWalletLabel(w: { address: string; ens?: string | null; input?: string }) {
+  if (w.ens) return w.ens;
+  if (w.input && !w.input.toLowerCase().startsWith("0x")) return w.input;
+  return shortenAddress(w.address, 4);
+}
+
+export function formatMultiWalletTitle(wallets: { address: string; ens?: string | null; input?: string }[]) {
+  const names = wallets.map(w => {
+    if (w.ens) return w.ens;
+    if (w.input && !w.input.toLowerCase().startsWith("0x")) return w.input;
+    return null;
+  }).filter(Boolean);
+  
+  if (names.length === 0) return "Type name";
+  if (names.length === 2) return names.join(" & ");
+  return names.join(", ");
 }
