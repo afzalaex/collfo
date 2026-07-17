@@ -52,6 +52,13 @@ export const SUPPORTED_CHAINS: SupportedChain[] = [
     shortName: "POL",
     explorer: "https://polygonscan.com",
   },
+  {
+    id: 360,
+    key: "shape",
+    name: "Shape",
+    shortName: "Shape",
+    explorer: "https://shapescan.xyz",
+  },
 ];
 
 export function chainById(id: number): SupportedChain | undefined {
