@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               rel="noreferrer"
               className="layout-action-link"
             >
-              Git-Repo
+              Source Code
             </a>
             <FeedbackForm />
           </div>
