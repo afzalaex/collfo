@@ -317,7 +317,7 @@ export async function fetchHoldersForCollection(
       });
       return {
         slug,
-        holders,
+        holders: holders.map((h) => ({ address: h.address, quantity: h.quantity ?? 1 })),
         uniqueOwners: holders.length,
         hasMore,
         nextCursor,
