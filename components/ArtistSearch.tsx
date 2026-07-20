@@ -156,8 +156,6 @@ export function ArtistSearch({ initial = "" }: Props) {
         Type your wallet address, ENS name, or OpenSea username. If you use
         multiple wallets, press <strong>Enter</strong> after each one to add
         another (commas work too), then click <strong>Search</strong>.
-        Collections from all entered wallets will be merged into a single
-        result. Maximum 10 wallets.
       </p>
     </form>
   );
