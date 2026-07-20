@@ -885,6 +885,14 @@ export function ProgressiveCollectors({
         ) : null}
       </div>
 
+      {uniqueCount > 0 && collections.length > detailDoneRef.current.size && phase !== "running" && (
+        <div className="filter-meta job-note" style={{ color: "var(--color-text)", borderColor: "var(--color-border-hover)" }}>
+          <p style={{ margin: 0 }}>
+            New collections were added. Please <strong>Reload collectors</strong> to get latest info.
+          </p>
+        </div>
+      )}
+
       {phase !== "done" && collectors.length === 0 && (
         <div className="filter-meta job-note">
           <p style={{ margin: "0 0 8px 0" }}>
