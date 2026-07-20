@@ -94,12 +94,45 @@ export async function lookupOpenSeaCollections(
   return out;
 }
 
+import { createPublicClient, http, parseAbi } from "viem";
+import { mainnet } from "viem/chains";
+
 async function lookupCustomContract(address: string): Promise<LookupResult> {
-  // Use Etherscan to fetch contract name if possible
   let name = address;
+  let estimatedOwners: number | null = null;
+  let totalSupply: number | null = null;
+
   try {
-    const key = process.env.ETHERSCAN_API_KEY;
-    if (key) {
+    const client = createPublicClient({
+      chain: mainnet,
+      transport: http("https://ethereum-rpc.publicnode.com"),
+    });
+    const abi = parseAbi([
+      "function name() view returns (string)",
+      "function totalSupply() view returns (uint256)"
+    ]);
+    
+    const [nameRes, supplyRes] = await Promise.allSettled([
+      client.readContract({ address: address as `0x${string}`, abi, functionName: "name" }),
+      client.readContract({ address: address as `0x${string}`, abi, functionName: "totalSupply" })
+    ]);
+
+    if (nameRes.status === "fulfilled" && nameRes.value) {
+      name = nameRes.value;
+    }
+    if (supplyRes.status === "fulfilled" && supplyRes.value !== undefined) {
+      totalSupply = Number(supplyRes.value);
+      estimatedOwners = totalSupply; // Fallback estimate
+    }
+  } catch (err) {
+    console.warn("RPC contract lookup failed:", err);
+  }
+
+  // Use Etherscan to fetch contract name if RPC failed
+  if (name === address) {
+    try {
+      const key = process.env.ETHERSCAN_API_KEY;
+      if (key) {
       const res = await fetch(`https://api.etherscan.io/v2/api?chainid=1&module=contract&action=getsourcecode&address=${address}&apikey=${key}`);
       const data = await res.json();
       if (data.status === "1" && data.result?.[0]?.ContractName) {
@@ -109,6 +142,7 @@ async function lookupCustomContract(address: string): Promise<LookupResult> {
   } catch (err) {
     console.error("Etherscan lookup error:", err);
   }
+}
 
   return {
     slug: address,
@@ -121,8 +155,8 @@ async function lookupCustomContract(address: string): Promise<LookupResult> {
       tokenType: "UNKNOWN",
       discovery: "user_added",
       openseaSlug: null, // this signals it's a custom contract!
-      totalSupply: null,
-      estimatedOwners: null,
+      totalSupply,
+      estimatedOwners,
       uniqueOwners: null,
       imageUrl: null,
     },
