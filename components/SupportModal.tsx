@@ -71,14 +71,16 @@ export function SupportModal() {
               <div className="mail-box" style={{ padding: "16px 0" }}>
                 <p style={{ margin: 0, lineHeight: 1.5 }}>
                   The best way to support me would be by collecting my daily art practice{" "}
-                  <a
-                    href="https://mint.networked.art/0x237047f8b97ab581974acaec36e6abba793a29b1/0x0f3f91d3dee2d6172a3c496b392ebeaa26318842"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="site-footer__link-text"
-                  >
-                    e/very days
-                  </a>.
+                  <span style={{ color: "var(--color-text-muted)" }}>
+                    <a
+                      href="https://mint.networked.art/0x237047f8b97ab581974acaec36e6abba793a29b1/0x0f3f91d3dee2d6172a3c496b392ebeaa26318842"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="site-footer__link-text"
+                    >
+                      e/very days
+                    </a>
+                  </span>.
                 </p>
               </div>
             </div>
