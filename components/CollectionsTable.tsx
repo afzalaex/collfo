@@ -14,7 +14,7 @@ type Props = {
   /** Lookup & merge OpenSea slugs/URLs the user pastes */
   onAddMissed?: (input: string) => Promise<string | null>;
   /** Remove a manually added collection (by OpenSea slug) */
-  onRemoveAdded?: (slug: string) => void;
+  onRemoveCollection?: (slug: string) => void;
   addingMissed?: boolean;
   canAdd?: boolean;
 };
@@ -22,7 +22,7 @@ type Props = {
 export function CollectionsTable({
   collections,
   onAddMissed,
-  onRemoveAdded,
+  onRemoveCollection,
   addingMissed = false,
   canAdd = true,
 }: Props) {
@@ -176,7 +176,7 @@ export function CollectionsTable({
             <th style={{ width: "10%" }}>Chain</th>
             <th style={{ width: "40%" }}>Contract</th>
             <th style={{ width: "15%" }}>Collectors</th>
-            {onRemoveAdded ? <th className="th-actions" aria-label="Actions" /> : null}
+            {onRemoveCollection ? <th className="th-actions" aria-label="Actions" /> : null}
           </tr>
         </thead>
         <tbody>
@@ -189,8 +189,7 @@ export function CollectionsTable({
               ? c.openseaSlug ?? c.contractAddress
               : shortenAddress(c.contractAddress, 4);
             const evmUrl = evmNowAddressUrl(c.contractAddress, c.chainId);
-            const canRemove =
-              c.discovery === "user_added" && Boolean(onRemoveAdded);
+            const canRemove = Boolean(onRemoveCollection);
             return (
               <tr key={`${c.openseaSlug ?? c.contractAddress}-${c.chainKey}`}>
                 <td>
@@ -233,15 +232,15 @@ export function CollectionsTable({
                     <span title="Collectors will be updated after loading">—</span>
                   )}
                 </td>
-                {onRemoveAdded ? (
+                {onRemoveCollection ? (
                   <td className="td-actions">
                     {canRemove ? (
                       <button
                         type="button"
                         className="row-remove-btn"
                         aria-label={`Remove ${c.name ?? (c.openseaSlug ?? c.contractAddress)}`}
-                        title="Remove added collection"
-                        onClick={() => onRemoveAdded(c.openseaSlug ?? c.contractAddress)}
+                        title="Remove collection"
+                        onClick={() => onRemoveCollection(c.openseaSlug ?? c.contractAddress)}
                       >
                         ×
                       </button>

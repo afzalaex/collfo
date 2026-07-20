@@ -158,21 +158,17 @@ export function ProgressiveCollectors({
     });
   }, []);
 
-  const onRemoveAddedCollection = useCallback((slug: string) => {
+  const onRemoveCollection = useCallback((slug: string) => {
     const key = slug.toLowerCase();
     const target = collections.find(
-      (c) =>
-        c.discovery === "user_added" &&
-        (c.openseaSlug ?? c.contractAddress)?.toLowerCase() === key
+      (c) => (c.openseaSlug ?? c.contractAddress)?.toLowerCase() === key
     );
     if (!target) return;
 
     // Unique/detail totals may include this collection — re-run jobs to refresh
     setCollections((prev) =>
       prev.filter(
-        (c) =>
-          c.discovery !== "user_added" ||
-          (c.openseaSlug ?? c.contractAddress)?.toLowerCase() !== key
+        (c) => (c.openseaSlug ?? c.contractAddress)?.toLowerCase() !== key
       )
     );
     countDoneRef.current.delete(key);
@@ -318,7 +314,7 @@ export function ProgressiveCollectors({
     ) => {
       const colKey = `slug:${slug}`;
       const map = detailMapRef.current;
-      const walletSet = new Set(wallets.map((w) => w.toLowerCase()));
+      const walletSet = new Set(wallets.map((w) => w?.toLowerCase?.() || ""));
 
       for (const holder of holders) {
         if (!holder?.address) continue;
@@ -396,7 +392,7 @@ export function ProgressiveCollectors({
       complete: boolean;
     } | null> => {
       const all: Array<{ address: string; quantity: number }> = [];
-      const walletSet = new Set(wallets.map((w) => w.toLowerCase()));
+      const walletSet = new Set(wallets.map((w) => w?.toLowerCase?.() || ""));
       const seen = new Set<string>();
       let cursor: string | null = null;
       let chunk = 0;
@@ -900,8 +896,8 @@ export function ProgressiveCollectors({
           canAdd={phase !== "running"}
           addingMissed={addingMissed}
           onAddMissed={onAddMissedCollections}
-          onRemoveAdded={
-            phase !== "running" ? onRemoveAddedCollection : undefined
+          onRemoveCollection={
+            phase !== "running" ? onRemoveCollection : undefined
           }
         />
       </section>
