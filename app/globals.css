@@ -988,25 +988,29 @@ a {
 /* —— Share card (PNG capture target) —— */
 .share-card-wrapper {
   width: 100%;
-  max-width: 500px;
   margin: 0 auto;
-  container-type: inline-size;
+}
+
+@media (max-width: 600px) {
+  .share-card-wrapper {
+    container-type: inline-size;
+  }
 }
 
 .share-card {
   width: 100%;
   background: #000;
   border: 1px solid var(--color-border-default);
-  padding: 10.4cqw 4.8cqw 6.4cqw;
+  padding: 68px 24px 44px;
   position: relative;
 }
 
 .share-card__brand {
   position: absolute;
-  top: 4.8cqw;
-  left: 4.8cqw;
+  top: 28px;
+  left: 24px;
   font-family: var(--font-display);
-  font-size: 3.2cqw;
+  font-size: 1.1rem;
   letter-spacing: 0.04em;
   text-transform: lowercase;
   color: #fff;
@@ -1014,46 +1018,85 @@ a {
 }
 
 .share-card__eyebrow {
-  margin-bottom: 2cqw;
-  font-size: 2.8cqw;
+  margin-bottom: 10px;
 }
 
 .share-card__title {
-  font-size: 5.12cqw !important;
-  line-height: 1.2;
-  margin-bottom: 2.4cqw !important;
+  font-size: clamp(1.4rem, 4vw, 2rem) !important;
+  margin-bottom: 12px !important;
 }
 
 .share-card__wallets {
-  margin-bottom: 3.2cqw;
+  margin-bottom: 16px;
 }
 
 .share-card__stats {
-  margin: 3.2cqw 0 0 !important;
+  margin: 20px 0 0 !important;
 }
 
 .share-card__stats .stat-cell {
-  padding: 3.2cqw;
+  padding: 16px;
 }
 
 .share-card__stats .stat-cell__label {
-  font-size: 2.3cqw;
-  margin-bottom: 1.2cqw;
+  font-size: 0.72rem;
+  margin-bottom: 6px;
 }
 
 .share-card__stats .stat-cell__value {
-  font-size: 4cqw;
+  font-size: 1.2rem;
 }
 
 .share-card__footer {
   position: absolute;
-  bottom: 3.2cqw;
-  right: 4.8cqw;
+  bottom: 20px;
+  right: 24px;
   margin: 0;
-  font-size: 2.3cqw;
+  font-size: 0.72rem;
   color: var(--color-text-muted);
   letter-spacing: 0.04em;
   text-align: right;
+}
+
+@media (max-width: 600px) {
+  .share-card {
+    padding: 10.4cqw 4.8cqw 6.4cqw;
+  }
+  .share-card__brand {
+    top: 4.8cqw;
+    left: 4.8cqw;
+    font-size: 3.2cqw;
+  }
+  .share-card__eyebrow {
+    margin-bottom: 2cqw;
+    font-size: 2.8cqw;
+  }
+  .share-card__title {
+    font-size: 5.12cqw !important;
+    line-height: 1.2;
+    margin-bottom: 2.4cqw !important;
+  }
+  .share-card__wallets {
+    margin-bottom: 3.2cqw;
+  }
+  .share-card__stats {
+    margin: 3.2cqw 0 0 !important;
+  }
+  .share-card__stats .stat-cell {
+    padding: 3.2cqw;
+  }
+  .share-card__stats .stat-cell__label {
+    font-size: 2.3cqw;
+    margin-bottom: 1.2cqw;
+  }
+  .share-card__stats .stat-cell__value {
+    font-size: 4cqw;
+  }
+  .share-card__footer {
+    bottom: 3.2cqw;
+    right: 4.8cqw;
+    font-size: 2.3cqw;
+  }
 }
 
 .share-actions {
