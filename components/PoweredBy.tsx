@@ -6,6 +6,9 @@ export function PoweredBy() {
         <a href="https://opensea.io" target="_blank" rel="noreferrer" aria-label="OpenSea">
           <img src="/assets/powered-by/os.svg" alt="OpenSea" />
         </a>
+        <a href="https://etherscan.io" target="_blank" rel="noreferrer" aria-label="Etherscan">
+          <img src="/assets/powered-by/es.svg" alt="Etherscan" />
+        </a>
         <a href="https://evm.now" target="_blank" rel="noreferrer" aria-label="EVM.now">
           <img src="/assets/powered-by/evm.svg" alt="EVM.now" />
         </a>
