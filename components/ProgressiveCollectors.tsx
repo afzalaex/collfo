@@ -318,8 +318,13 @@ export function ProgressiveCollectors({
     ) => {
       const colKey = `slug:${slug}`;
       const map = detailMapRef.current;
+      const walletSet = new Set(wallets.map((w) => w.toLowerCase()));
+
       for (const holder of holders) {
+        if (!holder?.address) continue;
         const addr = holder.address.toLowerCase();
+        if (walletSet.has(addr)) continue; // ignore the searched creator wallets
+
         let row = map.get(addr);
         if (!row) {
           row = {
@@ -391,6 +396,7 @@ export function ProgressiveCollectors({
       complete: boolean;
     } | null> => {
       const all: Array<{ address: string; quantity: number }> = [];
+      const walletSet = new Set(wallets.map((w) => w.toLowerCase()));
       const seen = new Set<string>();
       let cursor: string | null = null;
       let chunk = 0;
@@ -458,7 +464,9 @@ export function ProgressiveCollectors({
         }
 
         for (const h of chunkOk.holders ?? []) {
-          if (seen.has(h.address)) continue;
+          if (!h?.address) continue;
+          const lower = h.address.toLowerCase();
+          if (seen.has(h.address) || walletSet.has(lower)) continue;
           seen.add(h.address);
           all.push(h);
         }
@@ -501,7 +509,7 @@ export function ProgressiveCollectors({
         complete: !abortRef.current,
       };
     },
-    [artist]
+    [artist, wallets]
   );
 
   /**
@@ -519,16 +527,11 @@ export function ProgressiveCollectors({
       (detailDoneRef.current.size > 0 && remaining.length > 0);
 
     if (!isResume) {
-      const estimated =
-        totalOwnersSum > 0
-          ? `Estimated total owners: ${totalOwnersSum.toLocaleString("en-US")} (not unique). `
-          : "";
       const ok = await confirmAction(
         "Load unique collectors + full details?",
         [
           `Collections: ${collections.length}`,
-          estimated +
-            "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
+          "One walk builds the unique count and the full wallet list (ENS, ranking, CSV).",
           "Can take many minutes for large artists. In case it takes much longer keep the tab open and check back in some time.",
         ].join("\n\n")
       );

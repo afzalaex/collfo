@@ -94,7 +94,7 @@ export function CollectionsTable({
                 else { setSortKey("holders"); setSortDir("desc"); }
               }}
             >
-              Unique Collectors {sortKey === "holders" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Collectors {sortKey === "holders" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
             <button
               type="button"
@@ -174,9 +174,8 @@ export function CollectionsTable({
           <tr>
             <th style={{ width: "35%" }}>Name</th>
             <th style={{ width: "10%" }}>Chain</th>
-            <th style={{ width: "25%" }}>Contract</th>
-            <th style={{ width: "15%", whiteSpace: "normal" }}>Total Collectors</th>
-            <th style={{ width: "15%", whiteSpace: "normal" }}>Unique Collectors</th>
+            <th style={{ width: "40%" }}>Contract</th>
+            <th style={{ width: "15%" }}>Collectors</th>
             {onRemoveAdded ? <th className="th-actions" aria-label="Actions" /> : null}
           </tr>
         </thead>
@@ -229,12 +228,9 @@ export function CollectionsTable({
                     <span className="mono" style={{ whiteSpace: "nowrap" }}>{contractLabel}</span>
                   )}
                 </td>
-                <td>{c.estimatedOwners ?? c.uniqueOwners ?? "—"}</td>
                 <td>
-                  {c.uniqueOwners !== null ? (
-                    c.uniqueOwners
-                  ) : (
-                    <span title="Unique collectors will be updated after loading collectors">—</span>
+                  {c.estimatedOwners ?? c.uniqueOwners ?? (
+                    <span title="Collectors will be updated after loading">—</span>
                   )}
                 </td>
                 {onRemoveAdded ? (
