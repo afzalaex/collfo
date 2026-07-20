@@ -78,10 +78,6 @@ export async function getEtherscanCollectionHolders(
       // Factory contract event: Created(address indexed artpiece, address indexed minter, uint256 seed)
       const childContract = parseAddr(log.topics[1]);
       if (childContract) childContracts.add(childContract);
-    } else if (log.topics.length >= 3) {
-      // Fallback for custom events (usually the new owner/minter is topic[2])
-      const to = parseAddr(log.topics[2]);
-      if (to) addBal(to, 1);
     }
   }
 
