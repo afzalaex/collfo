@@ -820,6 +820,28 @@ export function ProgressiveCollectors({
         </div>
       )}
 
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+        <label 
+          className="mono" 
+          style={{ 
+            opacity: phase === "running" ? 0.5 : 1,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            cursor: phase === "running" ? "default" : "pointer",
+            fontSize: "0.85rem"
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={includeArtist}
+            disabled={phase === "running"}
+            onChange={(e) => setIncludeArtist(e.target.checked)}
+          />
+          Include artist as collector
+        </label>
+      </div>
+
       {/* Job actions */}
       <div className="load-actions load-actions--center" style={{ marginBottom: 16, gap: 10 }}>
         {phase === "running" ? (
@@ -843,27 +865,6 @@ export function ProgressiveCollectors({
                   : "Load collectors"}
           </button>
         )}
-
-        <label 
-          className="mono" 
-          style={{ 
-            marginLeft: "1.5rem", 
-            opacity: phase === "running" ? 0.5 : 1,
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            cursor: phase === "running" ? "default" : "pointer",
-            fontSize: "0.85rem"
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={includeArtist}
-            disabled={phase === "running"}
-            onChange={(e) => setIncludeArtist(e.target.checked)}
-          />
-          Include artist
-        </label>
 
         <button
           type="button"
