@@ -145,11 +145,9 @@ a {
 }
 
 .site-navbar__title {
-  flex: 1;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
-  padding-right: max(var(--navbar-inline-pad), env(safe-area-inset-right));
+  justify-content: center;
   font-family: var(--font-display);
   font-size: clamp(1.35rem, 3.5vw, 1.75rem);
   letter-spacing: 0.04em;
