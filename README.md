@@ -1,21 +1,46 @@
 # Collfo
 
-**Every collector of an artist** — all collections OpenSea attributes to them, one merged holder list.
+**Every collector of an artist** — all collections OpenSea attributes to them, plus any manually added custom contracts, distilled into one merged, deduplicated holder list.
 
 ---
 
-## How it works (OpenSea technique)
+## How it works
 
-```
-artist wallet
+Collfo uses a hybrid approach to find every piece of art an artist has created and then compiles a definitive list of their unique collectors.
+
+### 1. OpenSea Discovery (The default path)
+
+```text
+artist wallet or ENS
   → GET /api/v2/accounts/{address}           → username
   → GET /api/v2/collections?creator_username=…
   → for each collection slug:
         GET /api/v2/collections/{slug}/holders
-  → merge wallets ranked by # of that artist’s collections held
 ```
 
-This is the same **created-by** index as OpenSea’s profile, not on-chain “who deployed the bytecode.” Platform mints (Zora, Manifold, SeaDrop, Studio, shared factories) show up because OpenSea tracks **creator**, not EOA deployer.
+This leverages OpenSea's **created-by** index rather than relying purely on on-chain "who deployed the bytecode." Platform mints (Zora, Manifold, SeaDrop, Studio, shared factories) correctly show up here because OpenSea tracks the *creator/artist*, not just the EOA deployer.
+
+### 2. Custom Contracts (The Etherscan/Reservoir path)
+
+Artists often have sovereign smart contracts or platform drops that OpenSea hasn't indexed perfectly. Users can manually paste these contract addresses (or non-standard collection URLs) directly into Collfo to catch any missed collections.
+
+```text
+user inputs contract address
+  → Validate via EVM.now / network RPCs for basic metadata
+  → Fetch token holders via Reservoir API or block explorers (like Etherscan)
+  → Standardize owner balances and merge them into the global collector pool
+```
+
+### 3. Contract Verification & Reading (EVM.now)
+
+To keep the UI clean and chain-agnostic, Collfo links custom contracts directly to [EVM.now](https://evm.now). This acts as a universal, streamlined contract reader and block explorer, making it easy to read contract details across different EVM chains without jumping between Etherscan, Basescan, or Optimistic Etherscan.
+
+### 4. Merging & Ranking Collectors
+
+Once all collections (OpenSea native + manually added contracts) are loaded, Collfo streams all holders in the background. It applies the following logic:
+- **Filters out the creator:** The searched artist's wallets are subtracted from the holders list so they don't pad the stats.
+- **Deduplication:** A single wallet holding tokens across 5 different collections is counted as just *one* Unique Collector.
+- **Ranking:** Collectors are ranked by the *number of distinct collections* they hold, revealing the artist's most loyal supporters.
 
 ---
 
@@ -25,7 +50,7 @@ This is the same **created-by** index as OpenSea’s profile, not on-chain “wh
 |--------|--------|
 | App | Next.js 15 + React 19 + TypeScript |
 | Host | Vercel |
-| Data | **OpenSea API only** |
+| Data | OpenSea API + Reservoir / Etherscan + EVM.now |
 
 ---
 
@@ -46,7 +71,7 @@ curl -X POST https://api.opensea.io/api/v2/auth/keys
 
 (~30 day expiry, lower rate limits.)
 
-### If Settings → Developer says “not approved”
+### If Settings → Developer says "not approved"
 
 That’s the **full** developer hub. Skip it for now — use the instant key above (auto) or paste the `api_key` into `.env.local` as `OPENSEA_API_KEY`.
 
@@ -62,9 +87,10 @@ Deploy: `npx vercel` — either rely on instant keys or set `OPENSEA_API_KEY`.
 
 ## Repo map
 
-```
+```text
 lib/providers/opensea.ts   # account, created collections, holders
-lib/collectors.ts          # merge + rank
-app/artist/[address]       # UI
-app/api/artist/[address]   # JSON API
+lib/providers/etherscan.ts # custom contract data retrieval
+lib/collectors.ts          # merge + rank logic
+app/artist/[address]       # UI pages
+app/api/artist/[address]   # JSON API routes
 ```
