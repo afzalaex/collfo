@@ -643,11 +643,12 @@ export function ProgressiveCollectors({
 
   return (
     <div className="progressive">
-      {/* Capture target: artist identity + stats */}
-      <div ref={shareCardRef} className="share-card">
-        {sharing && <div className="share-card__brand">collfo</div>}
+      <div className="share-card-wrapper">
+        {/* Capture target: artist identity + stats */}
+        <div ref={shareCardRef} className="share-card">
+          {sharing && <div className="share-card__brand">collfo</div>}
 
-        <p className="page-eyebrow share-card__eyebrow">
+          <p className="page-eyebrow share-card__eyebrow">
           {wallets.length > 1 ? `Artist · ${wallets.length} wallets` : "Artist"}
         </p>
 
@@ -790,6 +791,7 @@ export function ProgressiveCollectors({
         </div>
 
         {sharing && <p className="share-card__footer">{MARKETING_URL.replace(/^https?:\/\//, "")}</p>}
+        </div>
       </div>
 
       <div className="share-actions">
