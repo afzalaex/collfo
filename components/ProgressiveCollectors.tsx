@@ -66,6 +66,7 @@ export function ProgressiveCollectors({
   const [statusLine, setStatusLine] = useState("");
   const [errors, setErrors] = useState<string[]>([]);
   const [version, setVersion] = useState(0);
+  const [includeArtist, setIncludeArtist] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [shareNote, setShareNote] = useState<string | null>(null);
   const shareCardRef = useRef<HTMLDivElement>(null);
@@ -314,7 +315,9 @@ export function ProgressiveCollectors({
     ) => {
       const colKey = `slug:${slug}`;
       const map = detailMapRef.current;
-      const walletSet = new Set(wallets.map((w) => w?.toLowerCase?.() || ""));
+      const walletSet = new Set(
+        includeArtist ? [] : wallets.map((w) => w.address.toLowerCase())
+      );
 
       for (const holder of holders) {
         if (!holder?.address) continue;
@@ -343,7 +346,7 @@ export function ProgressiveCollectors({
       }
       setVersion((v) => v + 1);
     },
-    []
+    [includeArtist, wallets]
   );
 
   const resolveEnsBatch = useCallback(async () => {
@@ -392,7 +395,9 @@ export function ProgressiveCollectors({
       complete: boolean;
     } | null> => {
       const all: Array<{ address: string; quantity: number }> = [];
-      const walletSet = new Set(wallets.map((w) => w?.toLowerCase?.() || ""));
+      const walletSet = new Set(
+        includeArtist ? [] : wallets.map((w) => w.address.toLowerCase())
+      );
       const seen = new Set<string>();
       let cursor: string | null = null;
       let chunk = 0;
@@ -505,7 +510,7 @@ export function ProgressiveCollectors({
         complete: !abortRef.current,
       };
     },
-    [artist, wallets]
+    [artist, wallets, includeArtist]
   );
 
   /**
@@ -830,13 +835,35 @@ export function ProgressiveCollectors({
           >
             {phase === "paused"
               ? "Resume"
-              : jobProgress > 0 && jobProgress < total
-                ? "Continue"
+              : detailDoneRef.current.size > 0 &&
+                detailDoneRef.current.size < collections.length
+                ? "Resume loading"
                 : collectors.length > 0 || uniqueCount > 0
                   ? "Reload collectors"
                   : "Load collectors"}
           </button>
         )}
+
+        <label 
+          className="mono" 
+          style={{ 
+            marginLeft: "1.5rem", 
+            opacity: phase === "running" ? 0.5 : 1,
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            cursor: phase === "running" ? "default" : "pointer",
+            fontSize: "0.85rem"
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={includeArtist}
+            disabled={phase === "running"}
+            onChange={(e) => setIncludeArtist(e.target.checked)}
+          />
+          Include artist
+        </label>
 
         <button
           type="button"
