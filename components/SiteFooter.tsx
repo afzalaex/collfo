@@ -1,3 +1,5 @@
+import { SupportModal } from "./SupportModal";
+
 export function SiteFooter() {
   return (
     <footer className="site-footer">
@@ -22,6 +24,8 @@ export function SiteFooter() {
           >
             Afzal
           </a>
+          {" · "}
+          <SupportModal />
         </span>
       </div>
     </footer>

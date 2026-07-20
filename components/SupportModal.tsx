@@ -37,7 +37,8 @@ export function SupportModal() {
     <>
       <button
         type="button"
-        className="layout-action-link"
+        className="site-footer__link-text"
+        style={{ background: "none", border: "none", padding: 0, font: "inherit", cursor: "pointer", color: "inherit" }}
         onClick={handleOpen}
       >
         Support

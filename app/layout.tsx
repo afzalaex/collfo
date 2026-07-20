@@ -5,7 +5,6 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { PoweredBy } from "@/components/PoweredBy";
 import { SiteNav } from "@/components/SiteNav";
 import { FeedbackForm } from "@/components/FeedbackForm";
-import { SupportModal } from "@/components/SupportModal";
 import "./globals.css";
 
 const siteUrl = (process.env.SITE_URL?.trim() || "https://collfo.aex.design").replace(
@@ -70,7 +69,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               Source Code
             </a>
             <FeedbackForm />
-            <SupportModal />
           </div>
           <SiteFooter />
         </div>
