@@ -29,6 +29,9 @@ export async function getEtherscanCollectionHolders(
   }
 
   if (data.status !== "1" || !Array.isArray(data.result)) {
+    if (typeof data.result === "string" && data.result.includes("limit")) {
+      throw new Error("429: " + data.result);
+    }
     throw new Error(data.result || "Failed to fetch logs from Etherscan");
   }
 

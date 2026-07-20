@@ -443,7 +443,7 @@ export function ProgressiveCollectors({
 
             const wait = Math.min(60_000, 1_500 * 2 ** (attempt - 1));
             setStatusLine(
-              `${response.status === 429 ? "Rate limited" : "OpenSea error"}. Waiting ${Math.round(wait / 1000)}s… (${attempt}/8) · ${slug}`
+              `${response.status === 429 ? "Rate limited" : "API error"}. Waiting ${Math.round(wait / 1000)}s. (${attempt}/8) · ${slug}`
             );
             await sleep(wait);
           } catch (e) {
