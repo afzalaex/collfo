@@ -238,82 +238,84 @@ export function CollectorsTable({
       {filtered.length === 0 ? (
         <div className="empty-state">No collectors match these filters.</div>
       ) : (
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>
-                <button type="button" className="th-btn" onClick={() => toggleSort("ens")}>
-                  ENS{sortMark("ens")}
-                </button>
-              </th>
-              <th>
-                <button
-                  type="button"
-                  className="th-btn"
-                  onClick={() => toggleSort("address")}
-                >
-                  Wallet{sortMark("address")}
-                </button>
-              </th>
-              <th>
-                <button
-                  type="button"
-                  className="th-btn"
-                  onClick={() => toggleSort("collectionCount")}
-                >
-                  Collections{sortMark("collectionCount")}
-                </button>
-              </th>
-              <th>
-                <button
-                  type="button"
-                  className="th-btn"
-                  onClick={() => toggleSort("tokenCount")}
-                >
-                  Tokens{sortMark("tokenCount")}
-                </button>
-              </th>
-              <th>Chains</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pageRows.map((c, i) => {
-              const rank = (safePage - 1) * pageSize + i + 1;
-              return (
-                <tr key={c.address}>
-                  <td>{rank}</td>
-                  <td>
-                    {c.ens ? (
+        <div className="table-responsive">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>
+                  <button type="button" className="th-btn" onClick={() => toggleSort("ens")}>
+                    ENS{sortMark("ens")}
+                  </button>
+                </th>
+                <th>
+                  <button
+                    type="button"
+                    className="th-btn"
+                    onClick={() => toggleSort("address")}
+                  >
+                    Wallet{sortMark("address")}
+                  </button>
+                </th>
+                <th>
+                  <button
+                    type="button"
+                    className="th-btn"
+                    onClick={() => toggleSort("collectionCount")}
+                  >
+                    Collections{sortMark("collectionCount")}
+                  </button>
+                </th>
+                <th>
+                  <button
+                    type="button"
+                    className="th-btn"
+                    onClick={() => toggleSort("tokenCount")}
+                  >
+                    Tokens{sortMark("tokenCount")}
+                  </button>
+                </th>
+                <th>Chains</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageRows.map((c, i) => {
+                const rank = (safePage - 1) * pageSize + i + 1;
+                return (
+                  <tr key={c.address}>
+                    <td>{rank}</td>
+                    <td>
+                      {c.ens ? (
+                        <a
+                          href={`https://app.ens.domains/${c.ens}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="ens-name"
+                        >
+                          {c.ens}
+                        </a>
+                      ) : (
+                        <span className="muted">—</span>
+                      )}
+                    </td>
+                    <td className="mono" title={c.address}>
                       <a
-                        href={`https://app.ens.domains/${c.ens}`}
+                        href={`https://opensea.io/${c.address}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="ens-name"
                       >
-                        {c.ens}
+                        {shortenAddress(c.address, 4)}
                       </a>
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
-                  </td>
-                  <td className="mono" title={c.address}>
-                    <a
-                      href={`https://opensea.io/${c.address}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {shortenAddress(c.address, 4)}
-                    </a>
-                  </td>
-                  <td>{c.collectionCount}</td>
-                  <td>{c.tokenCount}</td>
-                  <td>{c.chains.join(", ")}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td>{c.collectionCount}</td>
+                    <td>{c.tokenCount}</td>
+                    <td>{c.chains.join(", ")}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {filtered.length > pageSize && (

@@ -169,89 +169,91 @@ export function CollectionsTable({
         Showing {filtered.length} of {collections.length}
       </p>
 
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th style={{ width: "35%" }}>Name</th>
-            <th style={{ width: "10%" }}>Chain</th>
-            <th style={{ width: "40%" }}>Contract</th>
-            <th style={{ width: "15%" }}>Collectors</th>
-            {onRemoveCollection ? <th className="th-actions" aria-label="Actions" /> : null}
-          </tr>
-        </thead>
-        <tbody>
-          {filtered.map((c) => {
-            const chain = chainById(c.chainId) ?? null;
-            const chainLabel =
-              chain?.shortName ??
-              (c.chainKey && c.chainKey !== "unknown" ? c.chainKey : "—");
-            const contractLabel = c.contractAddress.startsWith("opensea:")
-              ? c.openseaSlug ?? c.contractAddress
-              : shortenAddress(c.contractAddress, 4);
-            const evmUrl = evmNowAddressUrl(c.contractAddress, c.chainId);
-            const canRemove = Boolean(onRemoveCollection);
-            return (
-              <tr key={`${c.openseaSlug ?? c.contractAddress}-${c.chainKey}`}>
-                <td>
-                  {c.openseaSlug ? (
-                    <a
-                      href={`https://opensea.io/collection/${c.openseaSlug}`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {c.name ?? c.openseaSlug}
-                    </a>
-                  ) : (
-                    c.name ?? "—"
-                  )}
-                  {c.discovery === "user_added" ? (
-                    <span className="muted" title="Added manually">
-                      {" "}
-                      · added
-                    </span>
-                  ) : null}
-                </td>
-                <td>{chainLabel}</td>
-                <td>
-                  {evmUrl ? (
-                    <a
-                      href={evmUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="mono"
-                      style={{ whiteSpace: "nowrap" }}
-                    >
-                      {contractLabel}
-                    </a>
-                  ) : (
-                    <span className="mono" style={{ whiteSpace: "nowrap" }}>{contractLabel}</span>
-                  )}
-                </td>
-                <td>
-                  {c.estimatedOwners ?? c.uniqueOwners ?? (
-                    <span title="Collectors will be updated after loading">—</span>
-                  )}
-                </td>
-                {onRemoveCollection ? (
-                  <td className="td-actions">
-                    {canRemove ? (
-                      <button
-                        type="button"
-                        className="row-remove-btn"
-                        aria-label={`Remove ${c.name ?? (c.openseaSlug ?? c.contractAddress)}`}
-                        title="Remove collection"
-                        onClick={() => onRemoveCollection(c.openseaSlug ?? c.contractAddress)}
+      <div className="table-responsive">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th style={{ width: "35%" }}>Name</th>
+              <th style={{ width: "10%" }}>Chain</th>
+              <th style={{ width: "40%" }}>Contract</th>
+              <th style={{ width: "15%" }}>Collectors</th>
+              {onRemoveCollection ? <th className="th-actions" aria-label="Actions" /> : null}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((c) => {
+              const chain = chainById(c.chainId) ?? null;
+              const chainLabel =
+                chain?.shortName ??
+                (c.chainKey && c.chainKey !== "unknown" ? c.chainKey : "—");
+              const contractLabel = c.contractAddress.startsWith("opensea:")
+                ? c.openseaSlug ?? c.contractAddress
+                : shortenAddress(c.contractAddress, 4);
+              const evmUrl = evmNowAddressUrl(c.contractAddress, c.chainId);
+              const canRemove = Boolean(onRemoveCollection);
+              return (
+                <tr key={`${c.openseaSlug ?? c.contractAddress}-${c.chainKey}`}>
+                  <td>
+                    {c.openseaSlug ? (
+                      <a
+                        href={`https://opensea.io/collection/${c.openseaSlug}`}
+                        target="_blank"
+                        rel="noreferrer"
                       >
-                        ×
-                      </button>
+                        {c.name ?? c.openseaSlug}
+                      </a>
+                    ) : (
+                      c.name ?? "—"
+                    )}
+                    {c.discovery === "user_added" ? (
+                      <span className="muted" title="Added manually">
+                        {" "}
+                        · added
+                      </span>
                     ) : null}
                   </td>
-                ) : null}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  <td>{chainLabel}</td>
+                  <td>
+                    {evmUrl ? (
+                      <a
+                        href={evmUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mono"
+                        style={{ whiteSpace: "nowrap" }}
+                      >
+                        {contractLabel}
+                      </a>
+                    ) : (
+                      <span className="mono" style={{ whiteSpace: "nowrap" }}>{contractLabel}</span>
+                    )}
+                  </td>
+                  <td>
+                    {c.estimatedOwners ?? c.uniqueOwners ?? (
+                      <span title="Collectors will be updated after loading">—</span>
+                    )}
+                  </td>
+                  {onRemoveCollection ? (
+                    <td className="td-actions">
+                      {canRemove ? (
+                        <button
+                          type="button"
+                          className="row-remove-btn"
+                          aria-label={`Remove ${c.name ?? (c.openseaSlug ?? c.contractAddress)}`}
+                          title="Remove collection"
+                          onClick={() => onRemoveCollection(c.openseaSlug ?? c.contractAddress)}
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                    </td>
+                  ) : null}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

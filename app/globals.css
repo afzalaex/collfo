@@ -761,6 +761,12 @@ a {
   text-underline-offset: 3px;
 }
 
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .empty-state {
   border: 1px dashed var(--color-border-strong);
   padding: 24px;
