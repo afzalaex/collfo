@@ -472,7 +472,7 @@ export function ProgressiveCollectors({
           all.push(h);
         }
 
-        onProgress?.(all.length, chunk);
+        onProgress?.(all.length);
 
         const hasMore =
           chunkOk.hasMore === true ||
