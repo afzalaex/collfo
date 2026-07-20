@@ -94,7 +94,7 @@ export function CollectionsTable({
                 else { setSortKey("holders"); setSortDir("desc"); }
               }}
             >
-              Holders {sortKey === "holders" ? (sortDir === "asc" ? "↑" : "↓") : ""}
+              Unique Collectors {sortKey === "holders" ? (sortDir === "asc" ? "↑" : "↓") : ""}
             </button>
             <button
               type="button"
@@ -174,7 +174,8 @@ export function CollectionsTable({
             <th>Name</th>
             <th>Chain</th>
             <th>Contract</th>
-            <th>Holders</th>
+            <th>Total Collectors</th>
+            <th>Unique Collectors</th>
             {onRemoveAdded ? <th className="th-actions" aria-label="Actions" /> : null}
           </tr>
         </thead>
@@ -189,8 +190,7 @@ export function CollectionsTable({
               : shortenAddress(c.contractAddress, 4);
             const evmUrl = evmNowAddressUrl(c.contractAddress, c.chainId);
             const canRemove =
-              c.discovery === "user_added" &&
-              Boolean(onRemoveAdded && c.openseaSlug);
+              c.discovery === "user_added" && Boolean(onRemoveAdded);
             return (
               <tr key={`${c.openseaSlug ?? c.contractAddress}-${c.chainKey}`}>
                 <td>
@@ -228,15 +228,16 @@ export function CollectionsTable({
                   )}
                 </td>
                 <td>{c.uniqueOwners ?? "—"}</td>
+                <td>{c.uniqueOwners ?? "—"}</td>
                 {onRemoveAdded ? (
                   <td className="td-actions">
                     {canRemove ? (
                       <button
                         type="button"
                         className="row-remove-btn"
-                        aria-label={`Remove ${c.name ?? c.openseaSlug}`}
+                        aria-label={`Remove ${c.name ?? (c.openseaSlug ?? c.contractAddress)}`}
                         title="Remove added collection"
-                        onClick={() => onRemoveAdded(c.openseaSlug!)}
+                        onClick={() => onRemoveAdded(c.openseaSlug ?? c.contractAddress)}
                       >
                         ×
                       </button>

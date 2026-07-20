@@ -304,6 +304,26 @@ export async function fetchHoldersForCollection(
     LIMITS.maxHolderPages;
   const pageSize = 100;
 
+  // Use Etherscan for custom contracts
+  if (slug.startsWith("0x") && slug.length === 42) {
+    const { getEtherscanCollectionHolders } = await import("./providers/etherscan");
+    const { holders, hasMore, nextCursor, pagesFetched } =
+      await getEtherscanCollectionHolders(slug, {
+        maxPages,
+        cursor: options?.cursor,
+      });
+
+    return {
+      slug,
+      holders,
+      uniqueOwners: holders.length,
+      hasMore,
+      nextCursor,
+      pagesFetched,
+      truncated: hasMore,
+    };
+  }
+
   const { holders, hasMore, nextCursor, pagesFetched } =
     await getOpenSeaCollectionHolders(slug, {
       maxPages,

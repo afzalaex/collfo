@@ -23,6 +23,10 @@ export async function lookupOpenSeaCollection(
     return { collection: null, slug, error: "Invalid slug" };
   }
 
+  if (isAddress(slug)) {
+    return lookupCustomContract(slug);
+  }
+
   const detail = await getOpenSeaCollection(slug);
   if (!detail || detail.is_disabled) {
     return {
@@ -87,4 +91,38 @@ export async function lookupOpenSeaCollections(
     out.push(await lookupOpenSeaCollection(slug));
   }
   return out;
+}
+
+async function lookupCustomContract(address: string): Promise<LookupResult> {
+  // Use Etherscan to fetch contract name if possible
+  let name = address;
+  try {
+    const key = process.env.ETHERSCAN_API_KEY;
+    if (key) {
+      const res = await fetch(`https://api.etherscan.io/v2/api?chainid=1&module=contract&action=getsourcecode&address=${address}&apikey=${key}`);
+      const data = await res.json();
+      if (data.status === "1" && data.result?.[0]?.ContractName) {
+        name = data.result[0].ContractName;
+      }
+    }
+  } catch (err) {
+    console.error("Etherscan lookup error:", err);
+  }
+
+  return {
+    slug: address,
+    collection: {
+      chainId: 1,
+      chainKey: "ethereum",
+      contractAddress: address,
+      name,
+      symbol: null,
+      tokenType: "UNKNOWN",
+      discovery: "user_added",
+      openseaSlug: null, // this signals it's a custom contract!
+      totalSupply: null,
+      uniqueOwners: null,
+      imageUrl: null,
+    },
+  };
 }

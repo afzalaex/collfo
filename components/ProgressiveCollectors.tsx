@@ -61,7 +61,6 @@ export function ProgressiveCollectors({
 }: Props) {
   const [customLabel, setCustomLabel] = useState<string | null>(null);
   const [collections, setCollections] = useState(initial);
-  const [totalOwnersSum, setTotalOwnersSum] = useState(initialOwnersSum);
   const [phase, setPhase] = useState<Phase>("idle");
   const [currentName, setCurrentName] = useState<string | null>(null);
   const [statusLine, setStatusLine] = useState("");
@@ -116,6 +115,10 @@ export function ProgressiveCollectors({
     return uniqueSetRef.current.size;
   }, [version]);
 
+  const totalOwnersSum = useMemo(() => {
+    return collections.reduce((acc, c) => acc + (c.uniqueOwners ?? 0), 0);
+  }, [collections]);
+
   const artistLabel = useMemo(() => {
     if (customLabel) return customLabel;
     if (wallets.length > 1) return formatMultiWalletTitle(wallets);
@@ -160,20 +163,16 @@ export function ProgressiveCollectors({
     const target = collections.find(
       (c) =>
         c.discovery === "user_added" &&
-        c.openseaSlug?.toLowerCase() === key
+        (c.openseaSlug ?? c.contractAddress)?.toLowerCase() === key
     );
     if (!target) return;
 
-    if (typeof target.uniqueOwners === "number") {
-      setTotalOwnersSum((sum) => Math.max(0, sum - target.uniqueOwners!));
-    }
+    // Unique/detail totals may include this collection — re-run jobs to refresh
     setCollections((prev) =>
       prev.filter(
         (c) =>
-          !(
-            c.discovery === "user_added" &&
-            c.openseaSlug?.toLowerCase() === key
-          )
+          c.discovery !== "user_added" ||
+          (c.openseaSlug ?? c.contractAddress)?.toLowerCase() !== key
       )
     );
     countDoneRef.current.delete(key);
@@ -217,15 +216,15 @@ export function ProgressiveCollectors({
             : "No collections found";
         }
 
-        const existing = new Set(
+        const existingKeys = new Set(
           collections
-            .map((c) => c.openseaSlug?.toLowerCase())
+            .map((c) => (c.openseaSlug || c.contractAddress)?.toLowerCase())
             .filter(Boolean) as string[]
         );
 
         const fresh = found.filter((c) => {
-          const slug = c.openseaSlug?.toLowerCase();
-          return slug && !existing.has(slug);
+          const key = (c.openseaSlug || c.contractAddress)?.toLowerCase();
+          return key && !existingKeys.has(key);
         });
         const skipped = found.length - fresh.length;
 
@@ -236,16 +235,6 @@ export function ProgressiveCollectors({
         }
 
         setCollections((prev) => [...prev, ...fresh]);
-        setTotalOwnersSum(
-          (sum) =>
-            sum +
-            fresh.reduce(
-              (acc, c) =>
-                acc +
-                (typeof c.uniqueOwners === "number" ? c.uniqueOwners : 0),
-              0
-            )
-        );
 
         if (uniqueSetRef.current.size > 0 || detailMapRef.current.size > 0) {
           setPhase("idle");
@@ -330,7 +319,8 @@ export function ProgressiveCollectors({
       const colKey = `slug:${slug}`;
       const map = detailMapRef.current;
       for (const holder of holders) {
-        let row = map.get(holder.address);
+        const addr = holder.address.toLowerCase();
+        let row = map.get(addr);
         if (!row) {
           row = {
             collectionCount: 0,
@@ -339,7 +329,7 @@ export function ProgressiveCollectors({
             collections: new Set(),
             ens: null,
           };
-          map.set(holder.address, row);
+          map.set(addr, row);
         }
         if (!row.collections.has(colKey)) {
           row.collectionCount += 1;
@@ -348,7 +338,7 @@ export function ProgressiveCollectors({
         row.tokenCount += holder.quantity;
         row.chains.add(chainKey);
         // Keep unique set in sync if they only run details
-        uniqueSetRef.current.add(holder.address);
+        uniqueSetRef.current.add(addr);
       }
       setVersion((v) => v + 1);
     },
@@ -394,7 +384,7 @@ export function ProgressiveCollectors({
   const fetchHolders = useCallback(
     async (
       slug: string,
-      onProgress?: (loaded: number, chunk: number) => void
+      onProgress: (loaded: number) => void
     ): Promise<{
       holders: Array<{ address: string; quantity: number }>;
       uniqueOwners: number;
@@ -520,9 +510,9 @@ export function ProgressiveCollectors({
   const runCollectors = useCallback(async () => {
     if (runningRef.current) return;
 
-    const slugged = collections.filter((c) => c.openseaSlug);
+    const slugged = collections.filter((c) => c.openseaSlug || c.contractAddress);
     const remaining = slugged.filter(
-      (c) => !detailDoneRef.current.has(c.openseaSlug!)
+      (c) => !detailDoneRef.current.has(c.openseaSlug || c.contractAddress)
     );
     const isResume =
       phase === "paused" ||
@@ -572,7 +562,7 @@ export function ProgressiveCollectors({
         }
 
         const col = collections[i]!;
-        const slug = col.openseaSlug;
+        const slug = col.openseaSlug || col.contractAddress;
         if (!slug || detailDoneRef.current.has(slug)) continue;
 
         setCurrentName(col.name ?? slug);
@@ -592,7 +582,7 @@ export function ProgressiveCollectors({
             detailDoneRef.current.add(slug);
             setCollections((prev) =>
               prev.map((item) =>
-                item.openseaSlug === slug
+                (item.openseaSlug || item.contractAddress) === slug
                   ? { ...item, uniqueOwners: data.uniqueOwners }
                   : item
               )
@@ -629,7 +619,6 @@ export function ProgressiveCollectors({
     mergeDetail,
     phase,
     resolveEnsBatch,
-    totalOwnersSum,
   ]);
 
   function pause() {
@@ -776,7 +765,7 @@ export function ProgressiveCollectors({
             <span className="stat-cell__value">{total}</span>
           </div>
           <div className="stat-cell">
-            <span className="stat-cell__label">Collectors</span>
+            <span className="stat-cell__label">Total collectors</span>
             <span className="stat-cell__value">
               {totalOwnersSum > 0 ? totalOwnersSum.toLocaleString("en-US") : "—"}
             </span>
