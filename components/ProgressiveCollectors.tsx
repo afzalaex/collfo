@@ -904,12 +904,9 @@ export function ProgressiveCollectors({
         </div>
       )}
 
-      {(statusLine || (currentName && busy)) && (
+      {statusLine && (
         <p className="filter-meta" style={{ marginBottom: 20 }}>
           {statusLine}
-          {currentName && busy ? (
-            <span className="muted"> · {currentName}</span>
-          ) : null}
         </p>
       )}
 
