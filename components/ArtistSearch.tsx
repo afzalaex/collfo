@@ -155,7 +155,7 @@ export function ArtistSearch({ initial = "" }: Props) {
       <p className="search-hint">
         Type your wallet address, ENS name, or OpenSea username. If you use
         multiple wallets, press <strong>Enter</strong> after each one to add
-        another (commas work too), then click <strong>Search</strong>.
+        another (commas work too).
       </p>
     </form>
   );
