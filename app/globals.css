@@ -988,19 +988,20 @@ a {
 /* —— Share card (PNG capture target) —— */
 .share-card {
   width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
   background: #000;
   border: 1px solid var(--color-border-default);
-  padding: 68px 24px 44px;
-  margin-bottom: 0;
+  padding: 52px 24px 32px;
   position: relative;
 }
 
 .share-card__brand {
   position: absolute;
-  top: 28px;
+  top: 24px;
   left: 24px;
   font-family: var(--font-display);
-  font-size: 1.1rem;
+  font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: lowercase;
   color: #fff;
@@ -1012,7 +1013,8 @@ a {
 }
 
 .share-card__title {
-  font-size: clamp(1.4rem, 4vw, 2rem) !important;
+  font-size: 1.6rem !important;
+  line-height: 1.2;
   margin-bottom: 12px !important;
 }
 
@@ -1021,12 +1023,12 @@ a {
 }
 
 .share-card__stats {
-  margin: 20px 0 0 !important;
+  margin: 16px 0 0 !important;
 }
 
 .share-card__footer {
   position: absolute;
-  bottom: 20px;
+  bottom: 16px;
   right: 24px;
   margin: 0;
   font-size: 0.72rem;
