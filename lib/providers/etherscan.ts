@@ -118,12 +118,8 @@ export async function getEtherscanCollectionHolders(
           }
         }
       }
-      const fs = require('fs');
-      fs.appendFileSync('debug_etherscan.txt', `Multicall success count: ${successCount}, Addresses set size: ${addresses.size}\n`);
     } catch (err) {
       console.warn("Failed multicall for child contracts:", err);
-      const fs = require('fs');
-      fs.appendFileSync('debug_etherscan.txt', `Multicall error: ${err}\n`);
     }
   }
 
