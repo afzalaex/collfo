@@ -116,7 +116,7 @@ export function ProgressiveCollectors({
   }, [version]);
 
   const totalOwnersSum = useMemo(() => {
-    return collections.reduce((acc, c) => acc + (c.uniqueOwners ?? 0), 0);
+    return collections.reduce((acc, c) => acc + (c.estimatedOwners ?? c.uniqueOwners ?? 0), 0);
   }, [collections]);
 
   const artistLabel = useMemo(() => {

@@ -8,6 +8,7 @@ export type CollectionSummary = {
   discovery: "opensea_created" | "user_added";
   openseaSlug?: string | null;
   totalSupply: number | null;
+  estimatedOwners: number | null;
   uniqueOwners: number | null;
   imageUrl: string | null;
 };

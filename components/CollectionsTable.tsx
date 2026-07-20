@@ -129,10 +129,11 @@ export function CollectionsTable({
       {showAdd && canAdd && onAddMissed ? (
         <div className="missed-inline">
           <p className="filter-meta" style={{ marginBottom: 8 }}>
-            Collfo can miss collections. Paste Opensea collection slug(s) or URLs.
+            Collfo can miss collections. Paste Opensea collection slug(s) or URLs. If the collections is not OS standard paste contract address.
           </p>
           <div className="missed-inline__row">
             <input
+              type="text"
               className="search-input filter-input missed-inline__input"
               value={missedInput}
               onChange={(e) => setMissedInput(e.target.value)}
@@ -142,7 +143,7 @@ export function CollectionsTable({
                   void submitMissed();
                 }
               }}
-              placeholder="slug or opensea.io/collection/…"
+              placeholder="Slug, opensea.io/collection/slug, or 0x..."
               autoComplete="off"
               spellCheck={false}
               disabled={addingMissed}
@@ -171,11 +172,11 @@ export function CollectionsTable({
       <table className="data-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Chain</th>
-            <th>Contract</th>
-            <th>Total Collectors</th>
-            <th>Unique Collectors</th>
+            <th style={{ width: "35%" }}>Name</th>
+            <th style={{ width: "10%" }}>Chain</th>
+            <th style={{ width: "25%" }}>Contract</th>
+            <th style={{ width: "15%", whiteSpace: "normal" }}>Total Collectors</th>
+            <th style={{ width: "15%", whiteSpace: "normal" }}>Unique Collectors</th>
             {onRemoveAdded ? <th className="th-actions" aria-label="Actions" /> : null}
           </tr>
         </thead>
@@ -213,22 +214,29 @@ export function CollectionsTable({
                   ) : null}
                 </td>
                 <td>{chainLabel}</td>
-                <td className="mono" title={c.contractAddress}>
+                <td>
                   {evmUrl ? (
                     <a
                       href={evmUrl}
                       target="_blank"
                       rel="noreferrer"
-                      title={`Open on evm.now (${chainLabel})`}
+                      className="mono"
+                      style={{ whiteSpace: "nowrap" }}
                     >
                       {contractLabel}
                     </a>
                   ) : (
-                    contractLabel
+                    <span className="mono" style={{ whiteSpace: "nowrap" }}>{contractLabel}</span>
                   )}
                 </td>
-                <td>{c.uniqueOwners ?? "—"}</td>
-                <td>{c.uniqueOwners ?? "—"}</td>
+                <td>{c.estimatedOwners ?? c.uniqueOwners ?? "—"}</td>
+                <td>
+                  {c.uniqueOwners !== null ? (
+                    c.uniqueOwners
+                  ) : (
+                    <span title="Unique collectors will be updated after loading collectors">—</span>
+                  )}
+                </td>
                 {onRemoveAdded ? (
                   <td className="td-actions">
                     {canRemove ? (

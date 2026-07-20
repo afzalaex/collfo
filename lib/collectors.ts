@@ -90,7 +90,8 @@ async function attachStats(
         discovery: "opensea_created",
         openseaSlug: job.slug,
         totalSupply: null,
-        uniqueOwners: numOwners,
+        estimatedOwners: numOwners,
+        uniqueOwners: null,
         imageUrl: job.imageUrl,
       };
     }
@@ -117,6 +118,7 @@ async function attachStats(
       discovery: "opensea_created",
       openseaSlug: job.slug,
       totalSupply: null,
+      estimatedOwners: null,
       uniqueOwners: null,
       imageUrl: job.imageUrl,
     };

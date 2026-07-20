@@ -76,7 +76,8 @@ export async function lookupOpenSeaCollection(
       openseaSlug: detail.collection || slug,
       totalSupply:
         typeof detail.total_supply === "number" ? detail.total_supply : null,
-      uniqueOwners: numOwners,
+      estimatedOwners: numOwners,
+      uniqueOwners: null,
       imageUrl: detail.image_url ?? null,
     },
   };
@@ -121,6 +122,7 @@ async function lookupCustomContract(address: string): Promise<LookupResult> {
       discovery: "user_added",
       openseaSlug: null, // this signals it's a custom contract!
       totalSupply: null,
+      estimatedOwners: null,
       uniqueOwners: null,
       imageUrl: null,
     },
