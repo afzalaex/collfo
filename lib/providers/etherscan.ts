@@ -74,6 +74,12 @@ export async function getEtherscanCollectionHolders(
       // value is usually in data, but we just count +1/-1 for holders (simplified)
       if (from) addBal(from, -1);
       if (to) addBal(to, 1);
+    } else if ((sig === "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0" || sig === "0xb0594827696749bdc48b310d4a5cfee5e9a89491f1c6bea2b928c2c33db414de") && log.topics.length >= 3) {
+      // OwnershipTransferred or ArtpieceTransferred (address indexed previousOwner, address indexed newOwner)
+      const from = parseAddr(log.topics[1]);
+      const to = parseAddr(log.topics[2]);
+      if (from) addBal(from, -1);
+      if (to) addBal(to, 1);
     } else if (sig === AAA_CREATED && log.topics.length >= 3) {
       // Factory contract event: Created(address indexed artpiece, address indexed minter, uint256 seed)
       const childContract = parseAddr(log.topics[1]);
