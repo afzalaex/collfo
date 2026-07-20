@@ -298,7 +298,7 @@ export type CollectionHoldersResult = {
  */
 export async function fetchHoldersForCollection(
   slug: string,
-  options?: { maxPages?: number; cursor?: string | null }
+  options?: { maxPages?: number; cursor?: string | null; isCustom?: boolean }
 ): Promise<CollectionHoldersResult> {
   const maxPages =
     options?.maxPages ??
@@ -306,46 +306,27 @@ export async function fetchHoldersForCollection(
     LIMITS.maxHolderPages;
   const pageSize = 100;
 
-  // Some OpenSea collections have the contract address as their slug.
-  // We try OpenSea first. If it fails (e.g. 404 because it's a true custom contract), we fallback to Etherscan.
-  if (slug.startsWith("0x") && slug.length === 42) {
-    try {
-      const { getOpenSeaCollectionHolders } = await import("./providers/opensea");
-      const { holders, hasMore, nextCursor, pagesFetched } = await getOpenSeaCollectionHolders(slug, {
+  // STRICT RULE: Only use Etherscan if explicitly flagged as a custom contract.
+  if (options?.isCustom) {
+    const { getEtherscanCollectionHolders } = await import("./providers/etherscan");
+    const { holders, hasMore, nextCursor, pagesFetched } =
+      await getEtherscanCollectionHolders(slug, {
         maxPages,
         cursor: options?.cursor,
       });
-      return {
-        slug,
-        holders: holders.map((h) => ({ address: h.address, quantity: h.quantity ?? 1 })),
-        uniqueOwners: holders.length,
-        hasMore,
-        nextCursor,
-        pagesFetched,
-        truncated: hasMore,
-      };
-    } catch (err: any) {
-      // If it throws, it's not a valid OpenSea collection slug. Fallback to Etherscan.
-      console.log("OpenSea fetch failed for address slug, falling back to Etherscan...", err.message);
-      const { getEtherscanCollectionHolders } = await import("./providers/etherscan");
-      const { holders, hasMore, nextCursor, pagesFetched } =
-        await getEtherscanCollectionHolders(slug, {
-          maxPages,
-          cursor: options?.cursor,
-        });
 
-      return {
-        slug,
-        holders,
-        uniqueOwners: holders.length,
-        hasMore,
-        nextCursor,
-        pagesFetched,
-        truncated: hasMore,
-      };
-    }
+    return {
+      slug,
+      holders,
+      uniqueOwners: holders.length,
+      hasMore,
+      nextCursor,
+      pagesFetched,
+      truncated: hasMore,
+    };
   }
 
+  const { getOpenSeaCollectionHolders } = await import("./providers/opensea");
   const { holders, hasMore, nextCursor, pagesFetched } =
     await getOpenSeaCollectionHolders(slug, {
       maxPages,

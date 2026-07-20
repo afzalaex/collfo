@@ -25,6 +25,7 @@ export async function GET(request: Request, context: RouteContext) {
   const { searchParams } = new URL(request.url);
   const slug = searchParams.get("slug")?.trim();
   const cursor = searchParams.get("cursor")?.trim() || null;
+  const isCustom = searchParams.get("custom") === "true";
 
   if (!slug) {
     return NextResponse.json({ error: "Missing ?slug=" }, { status: 400 });
@@ -34,6 +35,7 @@ export async function GET(request: Request, context: RouteContext) {
     const data = await fetchHoldersForCollection(slug, {
       maxPages: LIMITS.maxHolderPagesPerRequest ?? LIMITS.maxHolderPages,
       cursor,
+      isCustom,
     });
     return NextResponse.json(data, {
       headers: { "Cache-Control": "no-store" },

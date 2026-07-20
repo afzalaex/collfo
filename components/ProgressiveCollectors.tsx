@@ -388,6 +388,7 @@ export function ProgressiveCollectors({
   const fetchHolders = useCallback(
     async (
       slug: string,
+      isCustom: boolean,
       onProgress: (loaded: number) => void
     ): Promise<{
       holders: Array<{ address: string; quantity: number }>;
@@ -419,6 +420,7 @@ export function ProgressiveCollectors({
         for (let attempt = 1; attempt <= 8 && !abortRef.current; attempt++) {
           try {
             const params = new URLSearchParams({ slug });
+            if (isCustom) params.set("custom", "true");
             if (cursor) params.set("cursor", cursor);
             const response = await fetch(
               `/api/artist/${encodeURIComponent(artist)}/holders?${params}`
@@ -574,7 +576,8 @@ export function ProgressiveCollectors({
           `${i + 1}/${collections.length}: ${col.name ?? slug} · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique · ${detailMapRef.current.size.toLocaleString("en-US")} rows`
         );
 
-        const data = await fetchHolders(slug, (loaded) => {
+        const isCustom = !col.openseaSlug && !!col.contractAddress;
+        const data = await fetchHolders(slug, isCustom, (loaded) => {
           setStatusLine(
             `${i + 1}/${collections.length}: ${col.name ?? slug} · walking ${loaded.toLocaleString("en-US")} · ${uniqueSetRef.current.size.toLocaleString("en-US")} unique`
           );
