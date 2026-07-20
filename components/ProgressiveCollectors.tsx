@@ -822,15 +822,14 @@ export function ProgressiveCollectors({
 
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
         <label 
-          className="mono" 
           style={{ 
             opacity: phase === "running" ? 0.5 : 1,
-            color: "#888",
+            color: "var(--color-text-muted)",
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
             cursor: phase === "running" ? "default" : "pointer",
-            fontSize: "0.85rem"
+            fontSize: "0.78rem"
           }}
         >
           <input
