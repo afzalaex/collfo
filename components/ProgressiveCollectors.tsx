@@ -825,6 +825,7 @@ export function ProgressiveCollectors({
           className="mono" 
           style={{ 
             opacity: phase === "running" ? 0.5 : 1,
+            color: "#888",
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
