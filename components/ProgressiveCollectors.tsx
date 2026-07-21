@@ -898,7 +898,7 @@ export function ProgressiveCollectors({
         </div>
       )}
 
-      {phase !== "done" && collectors.length === 0 && (
+      {phase === "idle" && collectors.length === 0 && (
         <div className="filter-meta job-note">
           <p style={{ margin: "0 0 8px 0" }}>
             To improve performance, only collection details and the total collector count are loaded initially. Click <strong>Load Collectors</strong> to fetch the unique collector count and the complete collector list.
