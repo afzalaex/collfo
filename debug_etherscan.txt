@@ -1,6 +1,0 @@
-Multicall error: Error: client chain not configured. multicallAddress is required.
-Multicall success count: 256, Addresses set size: 152
-Multicall success count: 256, Addresses set size: 152
-Multicall success count: 256, Addresses set size: 152
-Multicall success count: 256, Addresses set size: 152
-Multicall success count: 256, Addresses set size: 152
