@@ -898,10 +898,10 @@ export function ProgressiveCollectors({
         </div>
       )}
 
-      {phase === "idle" && collectors.length === 0 && (
+      {phase === "idle" && !runningRef.current && collectors.length === 0 && (
         <div className="filter-meta job-note">
           <p style={{ margin: "0 0 8px 0" }}>
-            To improve performance, only collection details and the total collector count are loaded initially. Click <strong>Load Collectors</strong> to fetch the unique collector count and the complete collector list.
+            To improve performance, only collection details and the total collector count are loaded initially. Click <strong>Load collectors</strong> to fetch the unique collector count and the complete collector list.
           </p>
           <p style={{ margin: 0 }}>
             <em>Note: This may take some time, especially for artists with larger collectors base. In case it takes longer than expected keep this tab open check back in some time.</em>
