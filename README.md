@@ -27,8 +27,8 @@ Artists often have sovereign smart contracts or platform drops that OpenSea hasn
 ```text
 user inputs contract address
   → Validate via EVM.now / network RPCs for basic metadata
-  → Fetch token holders via Reservoir API or block explorers (like Etherscan)
-  → Standardize owner balances and merge them into the global collector pool
+  → Fetch token holders via block explorers (like Etherscan) parsing Transfer logs
+  → Extract unique token holders and merge them into the global collector pool
 ```
 
 ### 3. Contract Verification & Reading (EVM.now)
