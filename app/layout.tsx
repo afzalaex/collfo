@@ -73,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <SiteFooter />
         </div>
         <Analytics />
+        <script src="https://visitoralerts.com/tracker.js" async defer></script>
       </body>
     </html>
   );
