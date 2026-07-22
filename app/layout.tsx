@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   },
   description,
   icons: {
-    icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/assets/favicon.svg", type: "image/svg+xml" }, { url: "/favicon.ico" }],
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
