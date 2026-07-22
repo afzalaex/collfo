@@ -145,23 +145,22 @@ a {
 }
 
 .site-navbar__logo-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+  display: grid;
+  place-items: center;
   height: 24px;
+}
+
+.logo-monogram,
+.logo-full-wrapper {
+  grid-area: 1 / 1;
 }
 
 .logo-monogram {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   height: 100%;
-  pointer-events: none;
+  z-index: 2;
 }
 
 .logo-part-left,
@@ -180,6 +179,7 @@ a {
   overflow: hidden;
   transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
   height: 100%;
+  z-index: 1;
 }
 
 .logo-full-img {
