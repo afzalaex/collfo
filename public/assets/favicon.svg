@@ -6,17 +6,10 @@
 	.st0{fill:#FFFFFF;}
 </style>
 <g>
-	<rect x="0" width="512" height="512"/>
+	<rect width="512" height="512"/>
 </g>
-<g id="Layer_1-2">
-	<g>
-		<rect x="197.2" y="197.2" class="st0" width="117.7" height="23.5"/>
-		<rect x="197.2" y="244.2" class="st0" width="117.7" height="23.5"/>
-		<polygon class="st0" points="173.7,314.8 56,314.8 114.9,197.2 		"/>
-		<rect x="197.2" y="291.3" class="st0" width="117.7" height="23.5"/>
-		<polygon class="st0" points="456,197.2 432.5,220.7 409,244.2 397.2,256 397.2,256 397.2,256 385.4,244.2 361.9,220.7 
-			338.3,197.2 		"/>
-		<polygon class="st0" points="456,314.8 338.3,314.8 338.3,314.8 397.2,256 397.2,256 397.2,256 		"/>
-	</g>
+<g>
+	<path class="st0" d="M361,116h-35v70h35v140h-35v70h35l70-70V186L361,116z M81,186v140l70,70h140v-70H151V186h140v-70H151L81,186z"
+		/>
 </g>
 </svg>
