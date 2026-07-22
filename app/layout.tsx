@@ -54,8 +54,8 @@ export const metadata: Metadata = {
 
 import { cookies } from "next/headers";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = cookies();
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
   const hasSeenIntro = cookieStore.get("collfoIntroSeen")?.value === "true";
 
   return (
