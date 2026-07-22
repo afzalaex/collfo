@@ -147,7 +147,7 @@ a {
 .site-navbar__logo-group {
   display: grid;
   place-items: center;
-  height: 24px;
+  height: clamp(26px, 4vw, 32px);
 }
 
 .logo-monogram,
@@ -190,17 +190,17 @@ a {
 
 /* Hover States */
 .site-navbar__logo-group:hover .logo-part-left {
-  transform: translateX(-20px);
+  transform: translateX(-45px);
   opacity: 0;
 }
 
 .site-navbar__logo-group:hover .logo-part-right {
-  transform: translateX(20px);
+  transform: translateX(45px);
   opacity: 0;
 }
 
 .site-navbar__logo-group:hover .logo-full-wrapper {
-  max-width: 150px;
+  max-width: 250px;
   opacity: 1;
 }
 
