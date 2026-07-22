@@ -52,11 +52,16 @@ export const metadata: Metadata = {
   },
 };
 
+import { cookies } from "next/headers";
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = cookies();
+  const hasSeenIntro = cookieStore.get("collfoIntroSeen")?.value === "true";
+
   return (
     <html lang="en" className={`theme-dark ${spaceMono.variable}`}>
       <body suppressHydrationWarning>
-        <IntroAnimation />
+        <IntroAnimation initialShow={!hasSeenIntro} />
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>

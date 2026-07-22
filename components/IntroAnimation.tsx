@@ -3,18 +3,14 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export function IntroAnimation() {
-  const [show, setShow] = useState(false);
+export function IntroAnimation({ initialShow }: { initialShow: boolean }) {
+  const [show, setShow] = useState(initialShow);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    // Check if the user has already seen the intro this session
-    const hasSeenIntro = sessionStorage.getItem("collfoIntroSeen");
-    
-    if (!hasSeenIntro) {
-      setShow(true);
-      
-      // Start the fade out sequence after 2 seconds (allows animation to play)
+    // If the server determined they haven't seen it, play the animation
+    if (initialShow) {
+      // Start the fade out sequence after 2 seconds
       const fadeTimer = setTimeout(() => {
         setIsFadingOut(true);
       }, 2000);
@@ -22,7 +18,8 @@ export function IntroAnimation() {
       // Completely unmount after 2.5 seconds (after fade finishes)
       const unmountTimer = setTimeout(() => {
         setShow(false);
-        sessionStorage.setItem("collfoIntroSeen", "true");
+        // Set a session cookie so the server knows they've seen it for next time
+        document.cookie = "collfoIntroSeen=true; path=/";
       }, 2500);
       
       return () => {
@@ -30,7 +27,7 @@ export function IntroAnimation() {
         clearTimeout(unmountTimer);
       };
     }
-  }, []);
+  }, [initialShow]);
 
   if (!show) return null;
 
