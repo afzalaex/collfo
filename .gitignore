@@ -28,4 +28,9 @@ next-env.d.ts
 # vercel
 .vercel
 
+# debug output dumps
+*_logs.json
+out.json
+reservoir.json
+debug*.json
 .vercel
