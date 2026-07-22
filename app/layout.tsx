@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { PoweredBy } from "@/components/PoweredBy";
 import { SiteNav } from "@/components/SiteNav";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import { IntroAnimation } from "@/components/IntroAnimation";
 import "./globals.css";
 
 const siteUrl = (process.env.SITE_URL?.trim() || "https://collfo.aex.design").replace(
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`theme-dark ${spaceMono.variable}`}>
       <body suppressHydrationWarning>
+        <IntroAnimation />
         <div className="site-root">
           <SiteNav />
           <main className="site-content">{children}</main>

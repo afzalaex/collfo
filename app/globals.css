@@ -1524,3 +1524,105 @@ a {
   gap: 12px;
   margin-top: 24px;
 }
+
+/* —— Intro Animation (First-Time Visitor) —— */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-bg-default);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease;
+}
+
+.intro-overlay.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-logo-group {
+  display: grid;
+  place-items: center;
+  height: clamp(50px, 10vw, 80px); /* Massive scale */
+}
+
+.intro-logo-monogram,
+.intro-logo-full-wrapper {
+  grid-area: 1 / 1;
+}
+
+.intro-logo-monogram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  z-index: 2;
+}
+
+.intro-logo-full-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  height: 100%;
+  z-index: 1;
+  animation: introRevealFull 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.6s;
+}
+
+.intro-part-left {
+  height: 100%;
+  width: auto;
+  animation: introSlideLeft 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.6s;
+}
+
+.intro-part-right {
+  height: 100%;
+  width: auto;
+  animation: introSlideRight 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.6s;
+}
+
+.intro-logo-full-img {
+  height: 100%;
+  width: auto;
+  flex-shrink: 0;
+}
+
+@keyframes introSlideLeft {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(clamp(-250px, -20vw, -100px));
+    opacity: 0;
+  }
+}
+
+@keyframes introSlideRight {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(clamp(100px, 20vw, 250px));
+    opacity: 0;
+  }
+}
+
+@keyframes introRevealFull {
+  0% {
+    max-width: 0;
+    opacity: 0;
+  }
+  100% {
+    max-width: clamp(300px, 60vw, 600px);
+    opacity: 1;
+  }
+}
